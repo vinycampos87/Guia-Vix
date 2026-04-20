@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "bio": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "status": { "type": "string", "enum": ["active", "blocked", "banned"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "createdAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "logoUrl": { "type": "string" },
+        "adminWhatsApp": { "type": "string" },
+        "welcomeMessage": { "type": "string" }
+      }
+    },
+    "Business": {
+      "title": "Business",
+      "description": "Local business listing",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "address": { "type": "string" },
+        "mapsUrl": { "type": "string" },
+        "bannerImage": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "openingHours": { "type": "string" },
+        "isFeatured": { "type": "boolean" },
+        "boostExpiresAt": { "type": "string", "format": "date-time" },
+        "neighborhood": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "description", "bannerImage", "ownerId"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Business review and star rating",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "businessId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "rating", "businessId", "businessName"]
+    },
+    "Classified": {
+      "title": "Classified",
+      "description": "User posted classified ad",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "string" },
+        "contact": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "boostExpiresAt": { "type": "string", "format": "date-time" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "ownerId"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Job listing",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "salary": { "type": "string" },
+        "contact": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "boostExpiresAt": { "type": "string", "format": "date-time" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "ownerId"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "User's favorite business",
+      "type": "object",
+      "properties": {
+        "businessId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "category": { "type": "string" },
+        "bannerImage": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["businessId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/users/{userId}/favorites/{businessId}": {
+      "schema": "Favorite",
+      "description": "User's favorite businesses"
+    },
+    "/settings/{docId}": {
+      "schema": "AppSettings",
+      "description": "App settings"
+    },
+    "/businesses/{businessId}": {
+      "schema": "Business",
+      "description": "Business listings"
+    },
+    "/businesses/{businessId}/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Customer reviews"
+    },
+    "/classifieds/{classifiedId}": {
+      "schema": "Classified",
+      "description": "Classified ads"
+    },
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Job listings"
+    }
+  }
+}

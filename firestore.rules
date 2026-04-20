@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields:
+    //   - name: string (required)
+    //   - email: string (required, email format)
+    //   - bio: string (optional)
+    //   - photoURL: string (optional/null)
+    //   - role: string (optional, default 'client')
+    //   - createdAt: string/timestamp (required)
+    //
+    // Collection: businesses
+    // Fields:
+    //   - name: string (required)
+    //   - category: string (required)
+    //   - description: string (required)
+    //   - phone: string (required)
+    //   - whatsapp: string (required)
+    //   - address: string (required)
+    //   - mapsUrl: string (optional)
+    //   - bannerImage: string (required)
+    //   - images: list of strings (required)
+    //   - ownerId: string (required, immutable)
+    //   - createdAt: timestamp (required, immutable)
+    //   - updatedAt: timestamp (optional)
+    //
+    // Collection: classifieds
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - price: string (optional)
+    //   - contact: string (required)
+    //   - images: list of strings (required)
+    //   - ownerId: string (required, immutable)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: jobs
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - salary: string (optional)
+    //   - contact: string (required)
+    //   - ownerId: string (required, immutable)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (
+          (request.auth.token.email == "marcusvinicius.itj@gmail.com") ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        );
+    }
+
+    function isBlocked() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status in ['blocked', 'banned']);
+    }
+
+    function isActive() {
+      return isAuthenticated() && !isBlocked();
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*") || url.matches("^data:image/.*"));
+    }
+
+    function isTimestampOrString(val) {
+      return val is timestamp || val is string;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && isValidEmail(data.email) &&
+             (!('bio' in data) || data.bio == null || data.bio is string) &&
+             (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && (data.photoURL == "" || isValidUrl(data.photoURL)))) &&
+             (!('role' in data) || data.role in ['admin', 'user']) &&
+             (!('status' in data) || data.status in ['active', 'blocked', 'banned']) &&
+             (!('whatsapp' in data) || data.whatsapp is string) &&
+             (!('createdAt' in data) || isTimestampOrString(data.createdAt));
+    }
+
+    function isValidBusiness(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.category is string &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 5000 &&
+             data.phone is string &&
+             data.whatsapp is string &&
+             (!('email' in data) || data.email is string) &&
+             data.address is string &&
+             (!('mapsUrl' in data) || data.mapsUrl is string) &&
+             (!('openingHours' in data) || data.openingHours is string) &&
+             data.bannerImage is string && data.bannerImage.size() > 0 &&
+             data.images is list && data.images.size() <= 6 &&
+             data.createdAt is timestamp &&
+             (!('isFeatured' in data) || data.isFeatured is bool) &&
+             (!('boostExpiresAt' in data) || data.boostExpiresAt == null || data.boostExpiresAt is timestamp) &&
+             (!('neighborhood' in data) || data.neighborhood is string) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function isValidReview(data) {
+      return data.userId == request.auth.uid &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.comment is string && data.comment.size() < 1000 &&
+             data.businessId is string &&
+             data.businessName is string &&
+             (data.createdAt is timestamp || data.updatedAt is timestamp);
+    }
+
+    function isValidClassified(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 1000 &&
+             (!('price' in data) || data.price is string) &&
+             data.contact is string &&
+             data.type in ['produto', 'serviço'] &&
+             data.images is list && data.images.size() <= 6 &&
+             (!('boostExpiresAt' in data) || data.boostExpiresAt == null || data.boostExpiresAt is timestamp) &&
+             data.ownerId is string &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidJob(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.companyName is string && data.companyName.size() > 0 &&
+             data.city is string && data.city.size() > 0 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 5000 &&
+             (!('salary' in data) || data.salary is string) &&
+             data.contact is string &&
+             (!('whatsapp' in data) || data.whatsapp is string) &&
+             (!('email' in data) || isValidEmail(data.email)) &&
+             (!('boostExpiresAt' in data) || data.boostExpiresAt == null || data.boostExpiresAt is timestamp) &&
+             data.ownerId is string &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if (isOwner(userId) && !isBlocked() && isValidUser(request.resource.data) && 
+                      request.resource.data.email == resource.data.email &&
+                      (!('role' in request.resource.data) || request.resource.data.role == resource.data.role))
+                    || isAdmin();
+      allow delete: if isAdmin();
+
+      match /favorites/{businessId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /businesses/{businessId} {
+      allow read: if true;
+      allow create: if (isActive() && isValidBusiness(request.resource.data) && (
+                        isAdmin() || (
+                          request.resource.data.ownerId == request.auth.uid &&
+                          (!('isFeatured' in request.resource.data) || request.resource.data.isFeatured == false)
+                        )
+                      ));
+      allow update: if isActive() && 
+                      isValidBusiness(request.resource.data) &&
+                      request.resource.data.ownerId == resource.data.ownerId &&
+                      (
+                        isAdmin() || 
+                        (resource.data.ownerId == request.auth.uid && 
+                         (!('isFeatured' in request.resource.data) || request.resource.data.isFeatured == resource.data.isFeatured))
+                      );
+      allow delete: if (isActive() && resource.data.ownerId == request.auth.uid) || isAdmin();
+
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isActive() && isValidReview(request.resource.data) && reviewId == request.auth.uid;
+        allow update: if isActive() && resource.data.userId == request.auth.uid && isValidReview(request.resource.data);
+        allow delete: if (isActive() && resource.data.userId == request.auth.uid) || isAdmin();
+      }
+    }
+
+    match /{path=**}/reviews/{reviewId} {
+      allow read: if (isActive() && resource.data.userId == request.auth.uid) || isAdmin();
+    }
+
+    match /classifieds/{classifiedId} {
+      allow read: if true;
+      allow create: if isActive() && isValidClassified(request.resource.data) && (isAdmin() || request.resource.data.ownerId == request.auth.uid);
+      allow update: if isActive() && isValidClassified(request.resource.data) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow delete: if (isActive() && resource.data.ownerId == request.auth.uid) || isAdmin();
+    }
+
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if isActive() && isValidJob(request.resource.data) && (isAdmin() || request.resource.data.ownerId == request.auth.uid);
+      allow update: if isActive() && isValidJob(request.resource.data) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow delete: if (isActive() && resource.data.ownerId == request.auth.uid) || isAdmin();
+    }
+  }
+}
