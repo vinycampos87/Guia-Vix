@@ -229,17 +229,17 @@ export default function AdminScreen() {
     if (!user || seeding) return;
     setSeeding(true);
     try {
-      // Create Businesses
+      // Create Businesses (10)
       const businessData = [
         {
           name: 'Ilha do Caranguejo',
           category: 'Restaurante',
-          description: 'O melhor caranguejo e frutos do mar da região de Camburi.',
+          description: 'O melhor caranguejo e frutos do mar da região de Camburi. Ambiente familiar e barulhento, tipicamente capixaba.',
           phone: '(27) 3223-0101',
           whatsapp: '552732230101',
           address: 'Rua Paschoal Apóstolo Páschoal, 370 - Camburi',
           bannerImage: 'https://images.unsplash.com/photo-1596436805346-4356a30b8e66?auto=format&fit=crop&q=80&w=600',
-          images: ['https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=400'],
+          images: [],
           ownerId: user.uid,
           createdAt: serverTimestamp(),
           isFeatured: true,
@@ -250,7 +250,7 @@ export default function AdminScreen() {
         {
           name: 'Vix Fitness Camburi',
           category: 'Saúde',
-          description: 'Academia completa com vista para o mar e equipamentos modernos.',
+          description: 'Academia completa com vista para o mar, equipamentos modernos e acompanhamento profissional de alta qualidade.',
           phone: '(27) 99988-1234',
           whatsapp: '5527999881234',
           address: 'Av. Dante Michelini, 1200 - Camburi',
@@ -264,7 +264,7 @@ export default function AdminScreen() {
         {
           name: 'Café do Porto',
           category: 'Restaurante',
-          description: 'Cafés especiais e um ambiente perfeito para reuniões de trabalho.',
+          description: 'Cafés especiais, tortas artesanais e um ambiente perfeito para reuniões de trabalho na Enseada do Suá.',
           phone: '(27) 3020-4050',
           whatsapp: '552730204050',
           address: 'Praça do Papa - Enseada do Suá',
@@ -274,6 +274,104 @@ export default function AdminScreen() {
           createdAt: serverTimestamp(),
           latitude: -20.3117,
           longitude: -40.2942
+        },
+        {
+          name: 'Moda Vix Boutique',
+          category: 'Moda',
+          description: 'As últimas tendências da moda feminina e masculina com atendimento personalizado no coração da Praia do Canto.',
+          phone: '(27) 3344-5566',
+          whatsapp: '552733445566',
+          address: 'Rua Aleixo Netto, 450 - Praia do Canto',
+          bannerImage: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.3015,
+          longitude: -40.2912
+        },
+        {
+          name: 'Auto Mecânica Vitória',
+          category: 'Automotivo',
+          description: 'Reparos mecânicos, alinhamento, balanceamento e troca de óleo com profissionais certificados e rapidez.',
+          phone: '(27) 3222-1111',
+          whatsapp: '552732221111',
+          address: 'Av. Vitória, 2500 - Jucutuquara',
+          bannerImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.3150,
+          longitude: -40.3120
+        },
+        {
+          name: 'Escola Primeiros Passos',
+          category: 'Educação',
+          description: 'Educação infantil de qualidade com método inovador e ambiente seguro para o desenvolvimento do seu filho.',
+          phone: '(27) 3322-8899',
+          whatsapp: '552733228899',
+          address: 'Rua das Palmeiras, 15 - Jardim da Penha',
+          bannerImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.2850,
+          longitude: -40.2980
+        },
+        {
+          name: 'Clínica Sorriso Real',
+          category: 'Saúde',
+          description: 'Dentistas especializados em implantes, ortodontia e estética dental. Tecnologia de ponta para o seu sorriso.',
+          phone: '(27) 3030-2020',
+          whatsapp: '552730302020',
+          address: 'Ed. Wall Street - Enseada do Suá',
+          bannerImage: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.3130,
+          longitude: -40.2890
+        },
+        {
+          name: 'Pet Shop Auau Vix',
+          category: 'Serviços',
+          description: 'Banho e tosa, consultas veterinárias e as melhores rações para o seu melhor amigo. Temos serviço de busca.',
+          phone: '(27) 3232-4455',
+          whatsapp: '552732324455',
+          address: 'Rua da Lama, 100 - Jardim da Penha',
+          bannerImage: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.2820,
+          longitude: -40.2950
+        },
+        {
+          name: 'Imobiliária Capixaba',
+          category: 'Imobiliária',
+          description: 'Aluguel e venda de imóveis de alto padrão em Vitória e Vila Velha. Encontre o lar dos seus sonhos conosco.',
+          phone: '(27) 3050-6070',
+          whatsapp: '552730506070',
+          address: 'Av. Nossa Senhora da Penha, 2000 - Santa Lúcia',
+          bannerImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.3050,
+          longitude: -40.2980
+        },
+        {
+          name: 'Beleza & Estilo Salão',
+          category: 'Beleza',
+          description: 'Cortes modernos, coloração, manicure e tratamentos estéticos. O cuidado que você merece com os melhores produtos.',
+          phone: '(27) 3444-1122',
+          whatsapp: '552734441122',
+          address: 'Shopping Vitória - 2º Piso',
+          bannerImage: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80&w=600',
+          images: [],
+          ownerId: user.uid,
+          createdAt: serverTimestamp(),
+          latitude: -20.3190,
+          longitude: -40.2910
         }
       ];
 
@@ -281,25 +379,105 @@ export default function AdminScreen() {
         await addDoc(collection(db, 'businesses'), b);
       }
 
-      // Create Classifieds
+      // Create Classifieds (10)
       const classifiedData = [
         {
           title: 'iPhone 13 128GB Azul',
-          description: 'Aparelho em estado de novo, com caixa e nota fiscal. Saúde da bateria 92%.',
-          price: 'R$ 3.200',
+          description: 'Aparelho em excelente estado, bateria 89%, com todos os acessórios originais e nota fiscal brasileira.',
+          price: 'R$ 3.100',
           contact: '27999887766',
           type: 'produto',
-          images: ['https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&q=80&w=300'],
+          images: ['https://images.unsplash.com/photo-1632661674596-df8be070a5c5?auto=format&fit=crop&q=80&w=600'],
           ownerId: user.uid,
           createdAt: serverTimestamp()
         },
         {
           title: 'Bicicleta Caloi Aro 29',
-          description: 'Ideal para trilhas ou pedaladas na orla de Camburi. 21 marchas.',
-          price: 'R$ 850',
+          description: 'Bicicleta semi-nova, pouco uso, ideal para lazer ou transporte urbano. Revisada recentemente.',
+          price: 'R$ 950',
           contact: '27998881122',
           type: 'produto',
-          images: ['https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=300'],
+          images: ['https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Mesa de Jantar 6 Cadeiras',
+          description: 'Mesa de madeira maciça com tampo de vidro. Cadeiras em laca branca. Muito conservada.',
+          price: 'R$ 1.500',
+          contact: '27997773344',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1577146333355-630f875320a5?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Notebook Dell i7 16GB',
+          description: 'Notebook potente para trabalho ou estudos. SSD 512GB, placa de vídeo dedicada. Modelo 2022.',
+          price: 'R$ 4.200',
+          contact: '27996665544',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Violão Yamaha C40',
+          description: 'Violão acústico em perfeito estado. Acompanha capa protetora e encordoamento novo.',
+          price: 'R$ 600',
+          contact: '27995554433',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1550291652-6ea9114a47b1?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'PlayStation 5 com 2 Controles',
+          description: 'Console versão com disco. Inclui 3 jogos físicos e case de proteção para os controles.',
+          price: 'R$ 3.800',
+          contact: '27994443322',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Sofá 3 Lugares Retrátil',
+          description: 'Sofá cinza escuro, tecido suede premium. Super confortável e em ótimo estado de limpeza.',
+          price: 'R$ 1.200',
+          contact: '27993332211',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Geladeira Brastemp Frost Free',
+          description: 'Geladeira 440 litros inox. Funcionando perfeitamente, sem detalhes estéticos.',
+          price: 'R$ 2.400',
+          contact: '27992221100',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Tênis Nike Air Jordan (Novo)',
+          description: 'Tênis original, nunca usado. Tamanho 41. Cor clássica preto e vermelho.',
+          price: 'R$ 800',
+          contact: '27991110099',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=600'],
+          ownerId: user.uid,
+          createdAt: serverTimestamp()
+        },
+        {
+          title: 'Smart TV Samsung 55" 4K',
+          description: 'TV de última geração com controle remoto por voz. 1 ano de uso, impecável.',
+          price: 'R$ 2.100',
+          contact: '27990009988',
+          type: 'produto',
+          images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&q=80&w=600'],
           ownerId: user.uid,
           createdAt: serverTimestamp()
         }
@@ -309,35 +487,37 @@ export default function AdminScreen() {
         await addDoc(collection(db, 'classifieds'), c);
       }
 
-      // Create Jobs
+      // Create Jobs (20 as requested)
       const jobsData = [
-        {
-          title: 'Desenvolvedor Frontend React',
-          companyName: 'TechVix',
-          city: 'Vitória',
-          description: 'Oportunidade para trabalhar em startup de tecnologia em Vitória. Conhecimento em Tailwind e Firebase é um diferencial.',
-          salary: 'R$ 5.000 - R$ 7.000',
-          contact: 'vagas@techvix.com.br',
-          ownerId: user.uid,
-          createdAt: serverTimestamp()
-        },
-        {
-          title: 'Vendedor Loja Shopping Vitória',
-          companyName: 'Lojas Vix',
-          city: 'Vitória',
-          description: 'Vaga para área de vestuário masculino. Necessário experiência com vendas.',
-          salary: 'Fixo + Comissão',
-          contact: 'curriculo@lojasvix.com.br',
-          ownerId: user.uid,
-          createdAt: serverTimestamp()
-        }
+        // Batch 1 (10)
+        { title: 'Desenvolvedor Frontend Senior', companyName: 'VixTech', city: 'Vitória', description: 'Atuar no desenvolvimento de novas interfaces utilizando React e Tailwind.', salary: 'R$ 8.000 - R$ 12.000', contact: 'recrutamento@vixtech.com.br', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Vendedor de Loja', companyName: 'Moda Praia', city: 'Vitória', description: 'Vagas para as unidades do Shopping Vitória e Shopping Vila Velha.', salary: 'Comercial + Comissão', contact: 'cv@modapraia.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Recepcionista de Hotel', companyName: 'Ibis Vitória', city: 'Vitória', description: 'Atendimento ao público, check-in e check-out de hóspedes. Inglês básico desejável.', salary: 'R$ 1.800', contact: 'vagas@ibis-vix.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Gerente Comercial', companyName: 'Porto Seguro', city: 'Vitória', description: 'Gestão de equipe de vendas e prospecção de novos parceiros corporativos.', salary: 'R$ 5.000 + Bônus', contact: 'talentos@portoseguro.com.br', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Auxiliar de Cozinha', companyName: 'Pizza Vix', city: 'Vitória', description: 'Auxílio no preparo de massas e recheios. Horário noturno.', salary: 'R$ 1.600', contact: 'rh@pizzavix.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Estagiário de Direito', companyName: 'Lopes Advocacia', city: 'Vitória', description: 'Auxiliar na redação de peças e acompanhamento processual. 5º período em diante.', salary: 'Bolsa de R$ 1.000', contact: 'contato@lopesadv.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Ajudante de Carga e Descarga', companyName: 'LogExpress', city: 'Serra', description: 'Trabalho pesado com transporte de mercadorias. Disponibilidade imediata.', salary: 'R$ 1.500', contact: 'contratacao@logexpress.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Analista de Marketing Digital', companyName: 'Social Vix', city: 'Vitória', description: 'Gestão de redes sociais e tráfego pago (Google Ads/Meta Ads).', salary: 'R$ 3.500', contact: 'vagas@socialvix.agency', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Manicure e Pedicure', companyName: 'Studio Beleza', city: 'Vitória', description: 'Contrata-se profissional com experiência em unhas em gel.', salary: 'A combinar (Comissão)', contact: 'studiobeleza@whatsapp.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Vendedor Externo', companyName: 'Ambev', city: 'Cariacica', description: 'Visitação a pontos de venda e gestão de pedidos na região metropolitana.', salary: 'Salário fixo + Carro + Vale', contact: 'rh@ambev.com.br', ownerId: user.uid, createdAt: serverTimestamp() },
+        // Batch 2 (10)
+        { title: 'Cozinheiro Líder', companyName: 'Restaurante Sabor', city: 'Vitória', description: 'Responsável pela cozinha e elaboração de cardápios semanais.', salary: 'R$ 3.000', contact: 'sabor@vagas.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Atendente de Farmácia', companyName: 'Drogasil', city: 'Vitória', description: 'Atendimento ao balcão e organização de medicamentos. Necessário formação técnica.', salary: 'R$ 2.100', contact: 'rh@drogasil.com.br', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Motorista de Entrega (Categoria B)', companyName: 'Mercado Livre', city: 'Serra', description: 'Entregas residenciais na região de Vitória e arredores. Veículo próprio.', salary: 'Ganhos por entrega', coordinate: '-20.123, -40.123', contact: 'entregadores@mercadolivre.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Auxiliar Administrativo Júnior', companyName: 'Unimed Vitória', city: 'Vitória', description: 'Suporte na organização de documentos e atendimento telefônico.', salary: 'R$ 1.950', contact: 'vagas@unimedvitoria.coop.br', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Operador de Caixa', companyName: 'Supermercado EPA', city: 'Vitória', description: 'Fechamento de caixa e suporte ao cliente no PDV.', salary: 'R$ 1.700', contact: 'vagas@epa.com.br', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Corretor de Imóveis', companyName: 'RealEstate Vix', city: 'Vitória', description: 'Venda de empreendimentos na planta. Treinamento incluso.', salary: 'Comissão agressiva', contact: 'rh@realestate.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Estoquista', companyName: 'Nike Factory', city: 'Vila Velha', description: 'Organização de estoque e recebimento de mercadorias.', salary: 'R$ 1.850', contact: 'cv@nikefactory.vix', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Bartender', companyName: 'Sky Bar Camburi', city: 'Vitória', description: 'Experiência em coquetelaria clássica e moderna. Noite.', salary: 'R$ 2.500', contact: 'vagas@skybarvix.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Designer Gráfico Pleno', companyName: 'Agência Criativa', city: 'Vitória', description: 'Criação de marcas e peças publicitárias off-line e on-line.', salary: 'R$ 4.000', contact: 'portfolio@agenciacriativa.com', ownerId: user.uid, createdAt: serverTimestamp() },
+        { title: 'Mecânico de Motos', companyName: 'Moto Vix', city: 'Vitória', description: 'Especialista em motos de alta cilindrada. Reparos mecânicos e elétricos.', salary: 'R$ 3.500', contact: 'vagas@motovix.com.br', ownerId: user.uid, createdAt: serverTimestamp() }
       ];
 
       for (const j of jobsData) {
         await addDoc(collection(db, 'jobs'), j);
       }
 
-      alert('Dados de demonstração carregados com sucesso!');
+      alert('Dados de demonstração carregados com sucesso! (10 Empresas, 10 Anúncios e 20 Vagas)');
       fetchData();
     } catch (e) {
       console.error(e);
