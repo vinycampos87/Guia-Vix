@@ -161,7 +161,7 @@ export default function JobDetailScreen() {
       </div>
 
       {/* Scrollable Body */}
-      <div className="p-6 pb-32 no-scrollbar">
+      <div className="p-6 pb-32 no-scrollbar max-w-4xl mx-auto w-full">
         {/* Description Section */}
         <div className="space-y-4 mb-8">
           <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">

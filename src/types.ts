@@ -13,6 +13,7 @@ export interface UserProfile {
 
 export interface AppSettings {
   logoUrl?: string;
+  faviconUrl?: string;
   adminWhatsApp?: string;
   welcomeMessage?: string;
 }
@@ -39,6 +40,7 @@ export interface Business {
   neighborhood?: string;
   latitude?: number;
   longitude?: number;
+  website?: string;
 }
 
 export interface Review {

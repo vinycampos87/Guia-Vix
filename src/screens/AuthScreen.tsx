@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  updateProfile, 
+  sendPasswordResetEmail,
+  signInWithPopup,
+  GoogleAuthProvider
+} from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { LogIn, UserPlus, Mail, Lock, User, Phone, ChevronLeft } from 'lucide-react';
@@ -35,6 +42,26 @@ export default function AuthScreen() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      // Profile creation is handled in App.tsx onAuthStateChanged
+      navigate('/profile');
+    } catch (err: any) {
+      console.error("Google Auth Error:", err.code, err.message);
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Login cancelado.');
+      } else {
+        setError('Erro ao entrar com Google. Tente novamente.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -50,14 +77,46 @@ export default function AuthScreen() {
         
         // Create user document
         await setDoc(doc(db, 'users', userCredential.user.uid), {
+          uid: userCredential.user.uid,
           name,
           email,
           phone: whatsapp,
+          role: 'user',
+          status: 'active',
           createdAt: new Date().toISOString(),
         });
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error("Auth Error:", err.code, err.message);
+      
+      switch (err.code) {
+        case 'auth/invalid-credential':
+          setError('E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.');
+          break;
+        case 'auth/user-not-found':
+          setError('Usuário não encontrado. Verifique o e-mail ou cadastre-se.');
+          break;
+        case 'auth/wrong-password':
+          setError('Senha incorreta. Tente novamente ou use "Esqueci minha senha".');
+          break;
+        case 'auth/email-already-in-use':
+          setError('Este e-mail já está em uso por outra conta.');
+          break;
+        case 'auth/weak-password':
+          setError('A senha deve ter pelo menos 6 caracteres.');
+          break;
+        case 'auth/invalid-email':
+          setError('Por favor, insira um e-mail válido.');
+          break;
+        case 'auth/operation-not-allowed':
+          setError('O login por e-mail e senha não está habilitado no Console do Firebase.');
+          break;
+        case 'auth/too-many-requests':
+          setError('Muitas tentativas malsucedidas. Tente novamente mais tarde.');
+          break;
+        default:
+          setError('Ocorreu um erro ao tentar autenticar. Tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -171,6 +230,26 @@ export default function AuthScreen() {
             {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Cadastrar'}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-100"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
+              <span className="bg-white px-4 text-slate-400">Ou entre com</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50"
+          >
+            <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
+            <span className="text-sm">Google</span>
+          </button>
+        </div>
       </motion.div>
     </div>
   );

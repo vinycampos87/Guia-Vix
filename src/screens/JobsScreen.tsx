@@ -141,21 +141,22 @@ export default function JobsScreen() {
       </div>
 
       {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-white/50 rounded-2xl animate-pulse" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-48 bg-white/50 rounded-[32px] animate-pulse" />)}
         </div>
       ) : filteredJobs.length > 0 ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJobs.map((job) => (
             <motion.div
               layout
               key={job.id}
-              className="bg-white p-5 rounded-[28px] shadow-sm border border-white/40"
+              className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 flex flex-col h-full hover:shadow-md transition-all group"
             >
+              <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-800 text-lg leading-tight">{job.title}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-slate-800 text-lg leading-tight group-hover:text-primary transition-colors">{job.title}</h3>
                       {isBoosted(job) && (
                         <div className="bg-emerald-500 text-white p-1 rounded-full shadow-lg border-2 border-white">
                           <Star size={10} fill="currentColor" />
@@ -211,7 +212,8 @@ export default function JobsScreen() {
                     Candidatar-se
                   </button>
                 </div>
-              </motion.div>
+              </div>
+            </motion.div>
           ))}
         </div>
       ) : (

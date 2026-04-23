@@ -183,7 +183,7 @@ export default function HomeScreen() {
 
       {/* Banner Carousel */}
       {!loading && banners.length > 0 && (
-        <div className="relative h-44 rounded-[28px] overflow-hidden shadow-xl border border-white/20 bg-slate-100">
+        <div className="relative h-44 md:h-72 lg:h-96 rounded-[28px] overflow-hidden shadow-xl border border-white/20 bg-slate-100">
           {banners.map((banner, index) => (
             index === currentBanner && (
               <motion.div
@@ -230,8 +230,8 @@ export default function HomeScreen() {
       )}
 
       {/* Categories Horizontal Scroll */}
-      <section className="bg-white/60 backdrop-blur-sm -mx-4 px-4 py-4 border-y border-white/20">
-        <div className="flex overflow-x-auto gap-6 no-scrollbar">
+      <section className="bg-white/60 backdrop-blur-sm -mx-4 px-4 py-4 md:mx-0 md:rounded-[32px] md:border border-y border-white/20">
+        <div className="flex overflow-x-auto md:justify-center gap-6 no-scrollbar">
           <button
             onClick={() => setSelectedCategory(null)}
             className="flex flex-col items-center gap-2 flex-shrink-0 group"
@@ -269,19 +269,19 @@ export default function HomeScreen() {
               <Star size={16} className="fill-primary" /> Parceiros Premium
             </h2>
           </div>
-          <div className="flex overflow-x-auto gap-4 pb-4 px-1 no-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-1">
             {featuredList.map((b) => (
               <motion.div
                 key={b.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex-shrink-0 w-64"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full"
               >
                 <Link
                   to={`/business/${b.id}`}
-                  className="block group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100"
+                  className="block group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 h-full"
                 >
-                  <div className="relative h-32">
+                  <div className="relative h-40">
                     <img
                       src={b.bannerImage}
                       alt={b.name}
@@ -331,13 +331,13 @@ export default function HomeScreen() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map(i => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <div key={i} className="h-40 bg-white/50 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : regularBusinesses.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {regularBusinesses.map((b, index) => (
               <motion.div
                 key={b.id}
@@ -353,7 +353,7 @@ export default function HomeScreen() {
                     <img
                       src={b.bannerImage}
                       alt={b.name}
-                      className="w-full h-24 rounded-xl object-cover"
+                      className="w-full h-32 rounded-xl object-cover"
                       referrerPolicy="no-referrer"
                       loading="lazy"
                     />
@@ -374,7 +374,7 @@ export default function HomeScreen() {
                   <div className="px-1 pb-1">
                     <h3 className="font-bold text-slate-800 text-xs leading-tight line-clamp-1">{b.name}</h3>
                     <div className="flex items-center justify-between mt-1.5">
-                      <div className="text-[10px] text-slate-400 font-medium">
+                      <div className="text-[10px] text-slate-400 font-bold">
                         {userLocation && b.latitude ? (
                           <>
                             {formatDistance(calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude))} • ⭐ {b.rating?.toFixed(1) || '4.0'}

@@ -211,6 +211,17 @@ export default function AdminScreen() {
     reader.readAsDataURL(file);
   };
 
+  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setTempSettings(prev => ({ ...prev, faviconUrl: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const saveSettings = async () => {
     setLoading(true);
     try {
@@ -701,8 +712,39 @@ export default function AdminScreen() {
                   <div className="text-center">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">JPG ou PNG</p>
                     <label className="bg-white px-6 py-2.5 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
-                      <Upload size={14} /> Enviar Arquivo
+                      <Upload size={14} /> Enviar Logo
                       <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest flex items-center gap-2 pt-4">
+                <Shield size={16} className="text-primary" /> Favicon do Site
+              </h3>
+              <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50 gap-4">
+                  {tempSettings.faviconUrl ? (
+                    <div className="relative group">
+                      <img src={tempSettings.faviconUrl} alt="Favicon Preview" className="h-8 w-8 object-contain rounded-lg" referrerPolicy="no-referrer" />
+                      <button 
+                        onClick={() => setTempSettings(prev => ({...prev, faviconUrl: ''}))}
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300">
+                      <ImageIcon size={16} />
+                    </div>
+                  )}
+                  
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">JPG ou PNG (Sugerido 32x32)</p>
+                    <label className="bg-white px-6 py-2.5 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+                      <Upload size={14} /> Enviar Favicon
+                      <input type="file" accept="image/*" className="hidden" onChange={handleFaviconUpload} />
                     </label>
                   </div>
                 </div>

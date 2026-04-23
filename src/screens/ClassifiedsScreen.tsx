@@ -154,19 +154,19 @@ export default function ClassifiedsScreen() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-40 bg-white/50 rounded-xl animate-pulse" />)}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => <div key={i} className="h-40 bg-white/50 rounded-xl animate-pulse" />)}
         </div>
       ) : filteredAds.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {filteredAds.map((ad) => (
             <motion.div
               layout
               key={ad.id}
-              className="bg-white rounded-2xl shadow-sm border border-white/40 overflow-hidden flex flex-col active:scale-[0.98] transition-all"
+              className="bg-white rounded-2xl shadow-sm border border-white/40 overflow-hidden flex flex-col active:scale-[0.98] transition-all h-full"
             >
-              <Link to={`/classified/${ad.id}`} className="flex flex-col flex-1">
-                <div className="h-28 bg-slate-100 relative group">
+              <Link to={`/classified/${ad.id}`} className="flex flex-col flex-1 h-full">
+                <div className="h-28 bg-slate-100 relative group shrink-0">
                   {ad.images?.[0] ? (
                     <img src={ad.images[0]} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   ) : (

@@ -186,9 +186,9 @@ export default function BusinessesScreen() {
       </div>
 
       {/* List */}
-      <div className="p-6 space-y-4">
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          [1, 2, 3, 4, 5].map(i => (
+          [1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="h-28 bg-white rounded-[32px] animate-pulse" />
           ))
         ) : filteredBusinesses.length > 0 ? (
@@ -198,11 +198,12 @@ export default function BusinessesScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               key={b.id}
+              className="h-full"
             >
-              <Link to={`/business/${b.id}`}>
-                <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group active:scale-[0.98]">
-                  <div className="flex p-3 gap-4">
-                    <div className="relative">
+              <Link to={`/business/${b.id}`} className="block h-full">
+                <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group active:scale-[0.98] h-full flex flex-col">
+                  <div className="flex p-3 gap-4 flex-1">
+                    <div className="relative shrink-0">
                       <img 
                         src={b.bannerImage} 
                         className="w-24 h-24 rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform duration-500" 
@@ -265,8 +266,8 @@ export default function BusinessesScreen() {
             </motion.div>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center glass rounded-[40px] border-2 border-dashed border-slate-200">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+          <div className="col-span-full border-2 border-dashed border-slate-200 py-20 text-center glass rounded-[40px]">
+            <div className="w-16 h-16 bg-slate-100 mx-auto rounded-full flex items-center justify-center mb-4 text-slate-300">
               <Search size={32} />
             </div>
             <h3 className="font-black text-slate-800 tracking-tight">Nenhum resultado</h3>

@@ -13,7 +13,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } f
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { Home, ShoppingBag, Briefcase, Bus, User as UserIcon, LogIn, PlusCircle, Store } from 'lucide-react';
+import { Home, ShoppingBag, Briefcase, Bus, User as UserIcon, LogIn, PlusCircle, Store, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
 
@@ -105,39 +105,65 @@ function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden max-w-md mx-auto border-x border-white/20 shadow-2xl relative bg-slate-50">
-      {!shouldHideHeader && (
-        <header className="bg-white/80 backdrop-blur-md border-b border-white/30 px-6 pt-6 pb-2 flex items-center justify-between sticky top-0 z-50">
-          {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt="Logo" className="max-h-10 w-auto object-contain" referrerPolicy="no-referrer" />
-          ) : (
-            <h1 className="text-xl font-black text-primary tracking-tighter">Guia VIX</h1>
-          )}
+    <div className="flex flex-col min-h-screen w-full bg-slate-50 relative">
+      <header className={cn(
+        "bg-white/80 backdrop-blur-md border-b border-white/10 px-6 py-4 items-center justify-between sticky top-0 z-[60] shadow-sm",
+        shouldHideHeader ? "hidden md:flex" : "flex"
+      )}>
+        <div className="flex items-center gap-8 max-w-7xl mx-auto w-full">
+          <Link to="/" className="flex items-center gap-2">
+            {settings?.logoUrl ? (
+              <img src={settings.logoUrl} alt="Logo" className="max-h-12 w-auto object-contain" referrerPolicy="no-referrer" />
+            ) : (
+              <h1 className="text-2xl font-black text-primary tracking-tighter">Guia VIX</h1>
+            )}
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                    isActive ? "bg-primary/10 text-primary" : "text-slate-400 hover:text-slate-700 hober:bg-slate-50"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="flex-1" />
+
           <div className="flex items-center gap-3">
-            <div className="bg-slate-100 px-3 py-1 rounded-full text-[10px] font-bold text-slate-600">
-              Vitória, ES 📍
+            <div className="hidden sm:flex bg-slate-100 px-4 py-1.5 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200/50 items-center gap-1.5">
+              <MapPin size={12} className="text-primary" /> Vitória, ES
             </div>
             {user ? (
-              <Link to="/register-business" className="p-2 text-primary hover:bg-white/50 rounded-full transition-colors">
+              <Link to="/register-business" className="p-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl transition-all shadow-sm">
                 <PlusCircle size={24} />
               </Link>
             ) : (
-              <Link to="/auth" className="p-2 text-primary hover:bg-white/50 rounded-full transition-colors flex items-center gap-2">
-                <LogIn size={20} />
-                <span className="text-[10px] font-black uppercase tracking-wider hidden min-[400px]:inline">Entrar</span>
+              <Link to="/auth" className="px-5 py-2.5 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                Entrar
               </Link>
             )}
           </div>
-        </header>
-      )}
+        </div>
+      </header>
 
-      <main className="flex-1 overflow-y-auto pb-32">
+      <main className="flex-1 w-full max-w-7xl mx-auto md:px-6 pb-32">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
             className="h-full"
           >
@@ -146,7 +172,8 @@ function Layout({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-lg border-t border-white/30 px-2 py-1.5 flex justify-around items-center z-50 max-w-md mx-auto rounded-t-[32px] shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)]">
+      {/* Mobile Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-xl border-t border-white/30 px-2 py-2 flex justify-around items-center z-50 rounded-t-[32px] shadow-[0_-15px_40px_-5px_rgba(0,0,0,0.1)]">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -154,16 +181,16 @@ function Layout({ children }: { children: React.ReactNode }) {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center gap-1 p-2 transition-all duration-300 relative",
-                isActive ? "text-primary" : "text-slate-400 hover:text-slate-600"
+                "flex flex-col items-center gap-1.5 p-2 transition-all duration-300 relative",
+                isActive ? "text-primary scale-110" : "text-slate-400 hover:text-slate-600"
               )}
             >
-              <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">{item.label}</span>
+              <item.icon size={22} strokeWidth={isActive ? 3 : 2} />
+              <span className="text-[8px] font-black uppercase tracking-widest">{isActive ? item.label : ''}</span>
               {isActive && (
                 <motion.div 
-                  layoutId="nav-dot"
-                  className="w-1 h-1 bg-primary rounded-full mt-0.5"
+                  layoutId="nav-dot-active"
+                  className="w-1.5 h-1.5 bg-primary rounded-full absolute -bottom-1"
                 />
               )}
             </Link>
@@ -191,6 +218,16 @@ export default function App() {
       console.error("Error fetching settings:", e);
     }
   };
+
+  useEffect(() => {
+    if (settings?.faviconUrl) {
+      const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'shortcut icon';
+      link.href = settings.faviconUrl;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+  }, [settings?.faviconUrl]);
 
   useEffect(() => {
     fetchSettings();

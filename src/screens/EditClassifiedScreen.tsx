@@ -231,7 +231,7 @@ export default function EditClassifiedScreen() {
               />
             </div>
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contato (Zap)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Contato (WhatsApp)</label>
               <input
                 type="tel"
                 value={formData.contact}
