@@ -48,14 +48,20 @@ export default function AuthScreen() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      // Profile creation is handled in App.tsx onAuthStateChanged
       navigate('/profile');
     } catch (err: any) {
       console.error("Google Auth Error:", err.code, err.message);
+      
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Login cancelado.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setError('O popup foi bloqueado pelo navegador. Por favor, permita popups para este site.');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('O provedor Google não está ativado no Console do Firebase (Authentication > Sign-in method).');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError(`Este domínio (${window.location.hostname}) não está autorizado no Firebase Authentication. Adicione-o na aba "Settings" > "Authorized domains" no Console do Firebase.`);
       } else {
-        setError('Erro ao entrar com Google. Tente novamente.');
+        setError(`Erro ao entrar com Google (${err.code}). Verifique se o provedor está ativado no Firebase e se o domínio está autorizado.`);
       }
     } finally {
       setLoading(false);
