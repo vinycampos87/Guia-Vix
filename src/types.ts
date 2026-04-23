@@ -50,6 +50,7 @@ export interface Review {
   rating: number;
   comment: string;
   createdAt: any;
+  updatedAt?: any;
   businessId: string;
   businessName: string;
 }

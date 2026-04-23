@@ -124,6 +124,8 @@ service cloud.firestore {
              (!('isFeatured' in data) || data.isFeatured is bool) &&
              (!('boostExpiresAt' in data) || data.boostExpiresAt == null || data.boostExpiresAt is timestamp) &&
              (!('neighborhood' in data) || data.neighborhood is string) &&
+             (!('rating' in data) || data.rating is number) &&
+             (!('reviewCount' in data) || data.reviewCount is number) &&
              (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
 
@@ -199,7 +201,8 @@ service cloud.firestore {
                       (
                         isAdmin() || 
                         (resource.data.ownerId == request.auth.uid && 
-                         (!('isFeatured' in request.resource.data) || request.resource.data.isFeatured == resource.data.isFeatured))
+                         (!('isFeatured' in request.resource.data) || request.resource.data.isFeatured == resource.data.isFeatured)) ||
+                        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'reviewCount']))
                       );
       allow delete: if (isActive() && resource.data.ownerId == request.auth.uid) || isAdmin();
 

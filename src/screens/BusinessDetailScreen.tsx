@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, collection, setDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, Info, Send, User as UserIcon, Mail, X, Heart } from 'lucide-react';
+import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, Info, Send, User as UserIcon, Mail, X, Heart, Edit2, Trash2, Save } from 'lucide-react';
 import { Business, Review } from '../types';
 import { useAuth } from '../App';
 import { cn } from '../lib/utils';
@@ -31,7 +31,19 @@ export default function BusinessDetailScreen() {
   const [userRating, setUserRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [editingPersonalReview, setEditingPersonalReview] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const personalReview = useMemo(() => {
+    return user ? reviews.find(r => r.userId === user.uid) : null;
+  }, [user, reviews]);
+
+  useEffect(() => {
+    if (personalReview && !editingPersonalReview) {
+      setUserRating(personalReview.rating);
+      setComment(personalReview.comment);
+    }
+  }, [personalReview, editingPersonalReview]);
 
   useEffect(() => {
     if (!id) return;
@@ -113,8 +125,40 @@ export default function BusinessDetailScreen() {
   }, [business?.openingHours, scheduleData]);
 
   const hasReviewed = useMemo(() => {
-    return user && reviews.some(r => r.userId === user.uid);
-  }, [user, reviews]);
+    return !!personalReview;
+  }, [personalReview]);
+
+  const handleDeleteReview = async () => {
+    if (!user || !id || !business || !personalReview) return;
+    if (!confirm("Tem certeza que deseja excluir sua avaliação?")) return;
+
+    setSubmittingReview(true);
+    try {
+      await deleteDoc(doc(db, 'businesses', id, 'reviews', user.uid));
+
+      // Recalculate Business Rating
+      const newReviews = reviews.filter(r => r.userId !== user.uid);
+      const newCount = newReviews.length;
+      const newRating = newCount > 0 
+        ? newReviews.reduce((acc, r) => acc + r.rating, 0) / newCount 
+        : 0;
+
+      await updateDoc(doc(db, 'businesses', id), {
+        rating: newRating,
+        reviewCount: newCount
+      });
+
+      setUserRating(0);
+      setComment('');
+      setEditingPersonalReview(false);
+      alert("Avaliação excluída com sucesso!");
+    } catch (e) {
+      console.error("Error deleting review:", e);
+      alert("Erro ao excluir avaliação.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const handleReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,7 +179,8 @@ export default function BusinessDetailScreen() {
         comment,
         businessId: id,
         businessName: business.name,
-        createdAt: serverTimestamp(),
+        createdAt: personalReview ? (personalReview.createdAt || serverTimestamp()) : serverTimestamp(),
+        updatedAt: personalReview ? serverTimestamp() : null
       };
 
       await setDoc(doc(db, 'businesses', id, 'reviews', user.uid), reviewData);
@@ -151,9 +196,12 @@ export default function BusinessDetailScreen() {
         reviewCount: newCount
       });
 
-      setUserRating(0);
-      setComment('');
-      alert("Avaliação enviada com sucesso!");
+      if (!personalReview) {
+        setUserRating(0);
+        setComment('');
+      }
+      setEditingPersonalReview(false);
+      alert(personalReview ? "Avaliação atualizada!" : "Avaliação enviada com sucesso!");
     } catch (e) {
       console.error("Error submitting review:", e);
       alert("Erro ao enviar avaliação.");
@@ -362,33 +410,66 @@ export default function BusinessDetailScreen() {
               </div>
 
               {user ? (
-                hasReviewed ? (
-                  <div className="bg-amber-50 p-6 rounded-3xl text-center border border-amber-100">
-                    <div className="w-12 h-12 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Star size={24} fill="currentColor" />
+                hasReviewed && !editingPersonalReview ? (
+                  <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center font-black">
+                          {user.displayName?.charAt(0) || profile?.name?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <p className="text-amber-900 text-sm font-black uppercase tracking-tight">Sua Avaliação</p>
+                          <div className="flex text-amber-400 mt-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star key={s} size={12} fill={s <= (personalReview?.rating || 0) ? 'currentColor' : 'none'} />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setEditingPersonalReview(true)}
+                          className="p-2 text-amber-600 hover:bg-amber-100 rounded-xl transition-colors"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          onClick={handleDeleteReview}
+                          disabled={submittingReview}
+                          className="p-2 text-rose-500 hover:bg-rose-100 rounded-xl transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-amber-800 text-sm font-bold leading-tight">Você já avaliou esta empresa.</p>
-                    <p className="text-amber-600 text-[10px] mt-1 uppercase font-black tracking-widest">Gerencie através do seu perfil</p>
-                    <button 
-                      onClick={() => navigate('/profile')}
-                      className="mt-4 bg-amber-500 text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-500/20"
-                    >
-                      Ir para o Perfil
-                    </button>
+                    <p className="text-amber-800 text-sm font-medium italic bg-white/50 p-4 rounded-2xl border border-amber-100/50">
+                      "{personalReview?.comment}"
+                    </p>
                   </div>
                 ) : (
                   <form onSubmit={handleReview} className="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setUserRating(star)}
+                            className={`transition-all hover:scale-110 ${star <= userRating ? 'text-amber-400' : 'text-slate-300'}`}
+                          >
+                            <Star size={24} fill={star <= userRating ? 'currentColor' : 'none'} />
+                          </button>
+                        ))}
+                      </div>
+                      {editingPersonalReview && (
+                        <button 
                           type="button"
-                          onClick={() => setUserRating(star)}
-                          className={`transition-all hover:scale-110 ${star <= userRating ? 'text-amber-400' : 'text-slate-300'}`}
+                          onClick={() => setEditingPersonalReview(false)}
+                          className="text-[10px] font-black uppercase text-slate-400 hover:text-slate-600"
                         >
-                          <Star size={24} fill={star <= userRating ? 'currentColor' : 'none'} />
+                          Cancelar Edição
                         </button>
-                      ))}
+                      )}
                     </div>
                     <div className="relative">
                       <textarea
@@ -402,7 +483,7 @@ export default function BusinessDetailScreen() {
                         disabled={submittingReview || userRating === 0}
                         className="absolute bottom-3 right-3 p-2 bg-primary text-white rounded-xl shadow-lg disabled:opacity-50 hover:bg-primary/90 active:scale-90 transition-all"
                       >
-                        <Send size={18} />
+                        {editingPersonalReview ? <Save size={18} /> : <Send size={18} />}
                       </button>
                     </div>
                   </form>
