@@ -169,9 +169,9 @@ export default function EditClassifiedScreen() {
                   <button 
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow-lg"
+                    className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full shadow-lg transition-transform active:scale-95"
                   >
-                    <X size={12} />
+                    <X size={14} />
                   </button>
                 </div>
               ))}

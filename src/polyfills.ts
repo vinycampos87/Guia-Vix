@@ -107,6 +107,45 @@ if (typeof window !== 'undefined') {
       sendAsync: () => {}
     };
   }
+
+  // console.error polyfill to handle circular structures
+  const originalError = console.error;
+  const originalLog = console.log;
+
+  const safeArg = (arg: any) => {
+    if (typeof arg === 'object' && arg !== null) {
+      const cache = new Set();
+      const replacer = (_key: string, value: any) => {
+        if (typeof value === 'object' && value !== null) {
+          if (cache.has(value)) return '[Circular]';
+          cache.add(value);
+          if (value instanceof Node) return `[DOM Element: ${value.nodeName}]`;
+          if (value === window) return '[Window]';
+          if (value === document) return '[Document]';
+        }
+        return value;
+      };
+      try {
+        // Create a non-circular version for logging
+        return JSON.parse(JSON.stringify(arg, replacer));
+      } catch (e) {
+        try {
+          return String(arg);
+        } catch (err) {
+          return '[Unstringifiable Object]';
+        }
+      }
+    }
+    return arg;
+  };
+
+  console.error = (...args: any[]) => {
+    originalError.apply(console, args.map(safeArg));
+  };
+
+  console.log = (...args: any[]) => {
+    originalLog.apply(console, args.map(safeArg));
+  };
 }
 
 export {};

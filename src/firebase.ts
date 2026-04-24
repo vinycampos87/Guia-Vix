@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore, memoryLocalCache, getDocFromServer, doc } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
+import { safeStringify } from './lib/utils';
 
 const app = initializeApp(firebaseConfig);
 
@@ -41,8 +42,13 @@ interface FirestoreErrorInfo {
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const auth = getAuth();
+  
+  // Safely extract error message
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  
   const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
+    error: errorMessage,
     authInfo: {
       userId: auth.currentUser?.uid,
       email: auth.currentUser?.email,
@@ -59,8 +65,21 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  return new Error(JSON.stringify(errInfo));
+
+  // Convert to string before logging to prevent circular structure errors
+  // with some environment's console.error implementations
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(`[Firestore Error] ${operationType} on ${path}:`, errorMessage);
+    // Log details as a stringified JSON safely
+    console.error('Error Details:', safeStringify(errInfo));
+  }
+
+  // Return stringified JSON for ErrorBoundary to consume
+  try {
+    return new Error(safeStringify(errInfo));
+  } catch (e) {
+    return new Error(errorMessage || "An unknown error occurred");
+  }
 }
 
 // Simple connection test as per guidelines

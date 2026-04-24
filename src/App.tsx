@@ -185,8 +185,13 @@ function Layout({ children }: { children: React.ReactNode }) {
                 isActive ? "text-primary scale-110" : "text-slate-400 hover:text-slate-600"
               )}
             >
-              <item.icon size={22} strokeWidth={isActive ? 3 : 2} />
-              <span className="text-[8px] font-black uppercase tracking-widest">{isActive ? item.label : ''}</span>
+              <item.icon size={20} strokeWidth={isActive ? 3 : 2} />
+              <span className={cn(
+                "text-[7px] font-black uppercase tracking-tight text-center",
+                isActive ? "text-primary" : "text-slate-400"
+              )}>
+                {item.label}
+              </span>
               {isActive && (
                 <motion.div 
                   layoutId="nav-dot-active"

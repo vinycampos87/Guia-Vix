@@ -36,17 +36,23 @@ export default class ErrorBoundary extends React.Component<Props, State> {
       let details = "";
 
       try {
-        if (this.state.error?.message.startsWith('{')) {
-          const parsed = JSON.parse(this.state.error.message);
-          if (parsed.error?.includes('permissions')) {
+        const msg = this.state.error?.message;
+        if (msg && msg.startsWith('{')) {
+          const parsed = JSON.parse(msg);
+          if (parsed.error && (parsed.error.includes('permissions') || parsed.error.includes('permission'))) {
             errorMessage = "Você não tem permissão para realizar esta ação.";
+          } else {
+            errorMessage = parsed.error || errorMessage;
           }
-          details = `Operação: ${parsed.operationType} | Path: ${parsed.path}`;
-        } else {
-          errorMessage = this.state.error?.message || errorMessage;
+          if (parsed.operationType || parsed.path) {
+            details = `Operação: ${parsed.operationType || '?'} | Path: ${parsed.path || '?'}`;
+          }
+        } else if (msg) {
+          errorMessage = msg;
         }
       } catch (e) {
         // Fallback if parsing fails
+        errorMessage = this.state.error?.message || errorMessage;
       }
 
       return (

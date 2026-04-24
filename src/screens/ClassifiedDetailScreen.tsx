@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, Phone, MapPin, Tag, Share2, User, UserCircle, Edit2, Trash2, X } from 'lucide-react';
 import { Classified } from '../types';
 import { cn } from '../lib/utils';
+import { shareItem } from '../lib/share';
 import BoostHighlight from '../components/BoostHighlight';
 
 export default function ClassifiedDetailScreen() {
@@ -57,15 +58,7 @@ export default function ClassifiedDetailScreen() {
   if (!ad) return <div className="p-8 text-center text-slate-500 font-medium">Anúncio não encontrado.</div>;
 
   const handleShare = async () => {
-    try {
-      await navigator.share({
-        title: ad.title,
-        text: ad.description,
-        url: window.location.href,
-      });
-    } catch (err) {
-      console.error("Error sharing:", err);
-    }
+    shareItem(ad.title, ad.description);
   };
 
   const handleDelete = async () => {
@@ -75,7 +68,7 @@ export default function ClassifiedDetailScreen() {
       await deleteDoc(doc(db, 'classifieds', id));
       navigate('/classifieds');
     } catch (error) {
-      console.error("Error deleting:", error);
+      console.error("Error deleting:", error instanceof Error ? error.message : String(error));
       alert("Erro ao excluir anúncio.");
     } finally {
       setIsDeleting(false);
@@ -93,16 +86,16 @@ export default function ClassifiedDetailScreen() {
       )}>
         <button 
           onClick={() => navigate(-1)} 
-          className="p-3 bg-white/80 backdrop-blur-md rounded-2xl text-slate-800 shadow-xl pointer-events-auto active:scale-95 transition-transform"
+          className="p-1 px-1.5 bg-black/30 backdrop-blur-md rounded-xl text-white shadow-sm pointer-events-auto active:scale-95 transition-transform border border-white/20"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={18} />
         </button>
         
         <button 
           onClick={handleShare}
-          className="p-3 bg-white/80 backdrop-blur-md rounded-2xl text-slate-800 shadow-xl pointer-events-auto active:scale-95 transition-transform"
+          className="p-1 px-1.5 bg-black/30 backdrop-blur-md rounded-xl text-white shadow-sm pointer-events-auto active:scale-95 transition-transform border border-white/20"
         >
-          <Share2 size={20} />
+          <Share2 size={18} />
         </button>
       </div>
 
@@ -181,14 +174,16 @@ export default function ClassifiedDetailScreen() {
           </div>
 
           {/* Description Card */}
-          <div className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 space-y-3">
-            <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Descrição
-            </h3>
-            <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap font-medium break-words">
-              {ad.description}
-            </p>
-          </div>
+          {ad.description && (
+            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 space-y-3">
+              <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full" /> Descrição
+              </h3>
+              <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap font-medium break-words">
+                {ad.description}
+              </p>
+            </div>
+          )}
 
           {/* Gallery Card - Styled exactly like business page */}
           {ad.images && ad.images.length > 0 && (
@@ -212,24 +207,26 @@ export default function ClassifiedDetailScreen() {
           )}
 
           {/* Contact Actions */}
-          <div className="grid grid-cols-1 gap-3 py-2">
-            <a
-              href={`https://wa.me/${ad.contact.replace(/\D/g, '')}?text=Olá,%20tenho%20interesse%20no%20anúncio%20"${encodeURIComponent(ad.title)}"%20que%20vi%20no%20Guia%20VIX.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg shadow-green-100 hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-              </svg> WhatsApp
-            </a>
-            <a
-              href={`tel:${ad.contact}`}
-              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-sm"
-            >
-              Ligar Agora
-            </a>
-          </div>
+          {ad.contact && (
+            <div className="grid grid-cols-1 gap-3 py-2">
+              <a
+                href={`https://wa.me/${ad.contact.replace(/\D/g, '')}?text=Olá,%20tenho%20interesse%20no%20anúncio%20"${encodeURIComponent(ad.title)}"%20que%20vi%20no%20Guia%20VIX.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg shadow-[#25D366]/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg> WhatsApp
+              </a>
+              <a
+                href={`tel:${ad.contact}`}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
+              >
+                <Phone size={18} /> Ligar Agora
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -280,30 +277,30 @@ export default function ClassifiedDetailScreen() {
       {/* Image Preview Modal */}
       <AnimatePresence>
         {selectedImage && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedImage(null)}
-              className="absolute inset-0 bg-slate-900/90 backdrop-blur-md"
+              className="absolute inset-0 bg-black/95 backdrop-blur-xl"
             />
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-md aspect-square rounded-[32px] overflow-hidden shadow-2xl"
+              className="relative w-full h-full flex items-center justify-center p-2 md:p-10 pointer-events-none"
             >
               <img 
                 src={selectedImage} 
-                className="w-full h-full object-contain bg-slate-800"
+                className="max-w-full max-h-full object-contain pointer-events-auto shadow-2xl rounded-lg md:rounded-2xl"
                 referrerPolicy="no-referrer"
               />
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-2xl text-white hover:bg-white/40 transition-all border border-white/20"
+                className="absolute top-6 right-6 p-3 bg-white/10 backdrop-blur-md rounded-2xl text-white hover:bg-white/20 transition-all border border-white/10 pointer-events-auto"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             </motion.div>
           </div>

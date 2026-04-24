@@ -77,7 +77,7 @@ export default function AdminScreen() {
         }
       }
     } catch (error) {
-      console.error(`Error fetching ${activeTab}:`, error);
+      console.error(`Error fetching ${activeTab}:`, error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -124,7 +124,7 @@ export default function AdminScreen() {
       setItemToBoost(null);
       alert("Item impulsionado com sucesso!");
     } catch (error) {
-      console.error("Error boosting item:", error);
+      console.error("Error boosting item:", error instanceof Error ? error.message : String(error));
       alert("Erro ao impulsionar item.");
     } finally {
       setUpdatingId(null);
@@ -147,7 +147,7 @@ export default function AdminScreen() {
       if (coll === 'jobs') setJobs(prev => prev.map(j => j.id === id ? { ...j, ...updateData, boostExpiresAt: null } : j));
       if (coll === 'classifieds') setClassifieds(prev => prev.map(c => c.id === id ? { ...c, ...updateData, boostExpiresAt: null } : c));
     } catch (e) {
-      console.error("Error removing boost:", e);
+      console.error("Error removing boost:", e instanceof Error ? e.message : String(e));
     } finally {
       setUpdatingId(null);
     }
@@ -159,7 +159,7 @@ export default function AdminScreen() {
       await updateDoc(doc(db, 'users', userId), { status });
       setUsers(prev => prev.map(u => u.uid === userId ? { ...u, status } : u));
     } catch (e) {
-      console.error("Error updating user status:", e);
+      console.error("Error updating user status:", e instanceof Error ? e.message : String(e));
       alert("Erro ao atualizar status do usuário.");
     } finally {
       setUpdatingId(null);
@@ -172,7 +172,7 @@ export default function AdminScreen() {
       await updateDoc(doc(db, 'users', userId), { role });
       setUsers(prev => prev.map(u => u.uid === userId ? { ...u, role } : u));
     } catch (e) {
-      console.error("Error updating user role:", e);
+      console.error("Error updating user role:", e instanceof Error ? e.message : String(e));
       alert("Erro ao atualizar cargo do usuário.");
     } finally {
       setUpdatingId(null);
@@ -193,7 +193,7 @@ export default function AdminScreen() {
       setUserToEdit(null);
       alert("Usuário atualizado com sucesso!");
     } catch (error) {
-      console.error("Error editing user:", error);
+      console.error("Error editing user:", error instanceof Error ? error.message : String(error));
       alert("Erro ao editar usuário.");
     } finally {
       setLoading(false);
@@ -229,7 +229,7 @@ export default function AdminScreen() {
       await refreshSettings();
       alert("Configurações salvas com sucesso!");
     } catch (e) {
-      console.error("Error saving settings:", e);
+      console.error("Error saving settings:", e instanceof Error ? e.message : String(e));
       alert("Erro ao salvar configurações.");
     } finally {
       setLoading(false);
@@ -531,7 +531,7 @@ export default function AdminScreen() {
       alert('Dados de demonstração carregados com sucesso! (10 Empresas, 10 Anúncios e 20 Vagas)');
       fetchData();
     } catch (e) {
-      console.error(e);
+      console.error("Seed error:", e instanceof Error ? e.message : String(e));
       alert('Erro ao carregar dados de demonstração.');
     } finally {
       setSeeding(false);
@@ -563,7 +563,7 @@ export default function AdminScreen() {
       alert("Todo o conteúdo foi apagado com sucesso!");
       fetchData();
     } catch (error) {
-      console.error("Error clearing content:", error);
+      console.error("Error clearing content:", error instanceof Error ? error.message : String(error));
       alert("Erro ao apagar conteúdo.");
     } finally {
       setClearing(false);
@@ -603,7 +603,7 @@ export default function AdminScreen() {
       }
       setItemToDelete(null);
     } catch (error) {
-      console.error("Error deleting item:", error);
+      console.error("Error deleting item:", error instanceof Error ? error.message : String(error));
       alert("Erro ao excluir item.");
     } finally {
       setUpdatingId(null);

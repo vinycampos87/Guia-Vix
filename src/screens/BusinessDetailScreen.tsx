@@ -7,6 +7,7 @@ import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, 
 import { Business, Review } from '../types';
 import { useAuth } from '../App';
 import { cn } from '../lib/utils';
+import { shareItem } from '../lib/share';
 import BoostHighlight from '../components/BoostHighlight';
 import { useFavorites } from '../hooks/useFavorites';
 
@@ -153,7 +154,7 @@ export default function BusinessDetailScreen() {
       setEditingPersonalReview(false);
       alert("Avaliação excluída com sucesso!");
     } catch (e) {
-      console.error("Error deleting review:", e);
+      console.error("Error deleting review:", e instanceof Error ? e.message : String(e));
       alert("Erro ao excluir avaliação.");
     } finally {
       setSubmittingReview(false);
@@ -203,7 +204,7 @@ export default function BusinessDetailScreen() {
       setEditingPersonalReview(false);
       alert(personalReview ? "Avaliação atualizada!" : "Avaliação enviada com sucesso!");
     } catch (e) {
-      console.error("Error submitting review:", e);
+      console.error("Error submitting review:", e instanceof Error ? e.message : String(e));
       alert("Erro ao enviar avaliação.");
     } finally {
       setSubmittingReview(false);
@@ -238,37 +239,29 @@ export default function BusinessDetailScreen() {
         )}>
           <button 
             onClick={() => navigate(-1)}
-            className="p-2.5 bg-white/20 backdrop-blur-lg rounded-2xl text-white hover:bg-white/40 transition-all border border-white/30 active:scale-95"
+            className="p-1 px-1.5 bg-black/30 backdrop-blur-md rounded-xl text-white hover:bg-black/50 transition-all border border-white/20 active:scale-95 shadow-sm"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={18} />
           </button>
           
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button 
               onClick={() => toggleFavorite(business)}
               className={cn(
-                "p-2.5 backdrop-blur-lg rounded-2xl transition-all border active:scale-95",
+                "p-1 px-2 backdrop-blur-md rounded-xl transition-all border active:scale-95 shadow-sm",
                 favorites[business.id] 
-                  ? "bg-white text-red-500 border-white shadow-lg" 
-                  : "bg-white/20 text-white border-white/30 hover:bg-white/40"
+                  ? "bg-white text-red-500 border-white shadow-md" 
+                  : "bg-black/30 text-white border-white/20 hover:bg-black/50"
               )}
             >
-              <Heart size={24} fill={favorites[business.id] ? "currentColor" : "none"} strokeWidth={2.5} />
+              <Heart size={18} fill={favorites[business.id] ? "currentColor" : "none"} strokeWidth={2.5} />
             </button>
 
             <button 
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: business.name,
-                    text: business.description,
-                    url: window.location.href,
-                  });
-                }
-              }}
-              className="p-2.5 bg-white/20 backdrop-blur-lg rounded-2xl text-white hover:bg-white/40 transition-all border border-white/30 active:scale-95"
+              onClick={() => shareItem(business.name, business.description)}
+              className="p-1 px-2 bg-black/30 backdrop-blur-md rounded-xl text-white hover:bg-black/50 transition-all border border-white/20 active:scale-95 shadow-sm"
             >
-              <Share2 size={24} />
+              <Share2 size={18} />
             </button>
           </div>
         </div>
@@ -295,17 +288,17 @@ export default function BusinessDetailScreen() {
         <div className="md:col-span-8 flex flex-col gap-8">
           
           {/* Quick Info Card */}
-          <div className="bg-white rounded-[32px] p-6 shadow-xl shadow-slate-200 border border-slate-100 flex items-center justify-around">
-            <div className="flex flex-col items-center gap-1">
+          <div className="bg-white rounded-[32px] p-6 shadow-xl shadow-slate-200 border border-slate-100 flex flex-wrap items-center justify-center gap-y-4 md:gap-x-8">
+            <div className="flex flex-col items-center gap-1 min-w-[70px]">
               <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-400 shadow-inner">
                 <Star size={24} fill="currentColor" />
               </div>
               <span className="text-sm font-black text-slate-800">{Number(avgRating) > 0 ? avgRating : 'Novo'}</span>
             </div>
 
-            <div className="w-[1px] h-12 bg-slate-100" />
+            <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
 
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1 min-w-[70px]">
               <div className={`w-12 h-12 ${isOpen === true ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'} rounded-2xl flex items-center justify-center shadow-inner`}>
                 <Clock size={24} />
               </div>
@@ -314,55 +307,73 @@ export default function BusinessDetailScreen() {
               </span>
             </div>
 
-            <div className="w-[1px] h-12 bg-slate-100" />
-
-            <div className="flex flex-col items-center gap-1 group">
-              <a 
-                href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-12 h-12 bg-[#25D366]/10 rounded-2xl flex items-center justify-center text-[#25D366] shadow-inner hover:scale-110 hover:bg-[#25D366] hover:text-white transition-all transform duration-300"
-                title="WhatsApp"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-              </a>
-              <span className="text-[10px] font-black text-[#25D366] uppercase tracking-widest">WhatsApp</span>
-            </div>
-
-            <div className="w-[1px] h-12 bg-slate-100" />
-
-            <div className="flex flex-col items-center gap-1">
-              {business.email ? (
-                <a 
-                  href={`mailto:${business.email}`}
-                  className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-inner hover:scale-105 active:scale-95 transition-all"
-                >
-                  <Mail size={24} />
-                </a>
-              ) : (
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 shadow-inner">
-                  <Mail size={24} />
+            {business.phone && (
+              <>
+                <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
+                <div className="flex flex-col items-center gap-1 min-w-[70px]">
+                  <a 
+                    href={`tel:${business.phone}`}
+                    className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 shadow-inner hover:text-primary transition-colors"
+                  >
+                    <Phone size={24} />
+                  </a>
+                  <span className="text-sm font-black text-slate-800">Ligar</span>
                 </div>
-              )}
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">E-mail</span>
-            </div>
+              </>
+            )}
+
+            {business.whatsapp && (
+              <>
+                <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
+                <div className="flex flex-col items-center gap-1 group min-w-[70px]">
+                  <a 
+                    href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 bg-[#25D366] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#25D366]/20 hover:scale-110 transition-all transform duration-300"
+                    title="WhatsApp"
+                  >
+                    {/* WhatsApp Original Logo SVG */}
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                  </a>
+                  <span className="text-sm font-black text-[#25D366]">WhatsApp</span>
+                </div>
+              </>
+            )}
+
+            {business.email && (
+              <>
+                <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
+                <div className="flex flex-col items-center gap-1 min-w-[70px]">
+                  <a 
+                    href={`mailto:${business.email}`}
+                    className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 hover:scale-105 transition-all"
+                  >
+                    <Mail size={24} />
+                  </a>
+                  <span className="text-sm font-black text-blue-500 text-center truncate w-full px-1">E-mail</span>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex flex-col gap-6">
             {/* About */}
-            <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-slate-100 rounded-xl text-slate-600">
-                  <Info size={18} />
+            {business.description && (
+              <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-slate-100 rounded-xl text-slate-600">
+                    <Info size={18} />
+                  </div>
+                  <h2 className="text-lg font-black text-slate-800 tracking-tight">Sobre o Negócio</h2>
                 </div>
-                <h2 className="text-lg font-black text-slate-800 tracking-tight">Sobre o Negócio</h2>
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed font-medium break-words">
-                {business.description}
-              </p>
-            </section>
+                <p className="text-slate-600 text-sm leading-relaxed font-medium break-words">
+                  {business.description}
+                </p>
+              </section>
+            )}
 
             {/* Gallery */}
             {business.images && business.images.length > 0 && (
@@ -382,23 +393,100 @@ export default function BusinessDetailScreen() {
               </section>
             )}
 
+            {/* Opening Hours */}
+            {business.openingHours && (
+              <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-primary/5 rounded-2xl text-primary">
+                    <Clock size={22} />
+                  </div>
+                  <h2 className="text-xl font-black text-slate-800 tracking-tight">Horários</h2>
+                </div>
+                
+                {scheduleData ? (
+                  <div className="space-y-3">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const dayInfo = scheduleData[day.key];
+                      const isToday = new Date().getDay() === (DAYS_OF_WEEK.findIndex(d => d.key === day.key) + 1) % 7;
+                      
+                      return (
+                        <div key={day.key} className={cn(
+                          "flex justify-between items-center text-sm py-2.5 px-4 rounded-2xl transition-colors",
+                          isToday ? "bg-primary/5 text-primary" : "text-slate-600 border border-transparent"
+                        )}>
+                          <span className={cn("font-bold", isToday ? "font-black" : "")}>{day.label}</span>
+                          <span className={cn("font-medium", dayInfo?.isOpen ? "text-slate-800" : "text-slate-400")}>
+                            {dayInfo?.isOpen ? dayInfo.hours : 'Fechado'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-slate-500 text-sm font-medium">
+                    {business.openingHours}
+                  </p>
+                )}
+              </section>
+            )}
+
+            {/* Location Area */}
+            {business.address && (
+              <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-primary/5 rounded-2xl text-primary">
+                    <MapPin size={22} />
+                  </div>
+                  <h2 className="text-xl font-black text-slate-800 tracking-tight">Endereço</h2>
+                </div>
+                <div className="space-y-5">
+                  <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100">
+                    <p className="text-slate-700 font-bold text-sm leading-relaxed">
+                      {business.address}
+                    </p>
+                  </div>
+                  {business.mapsUrl && (
+                    <a 
+                      href={business.mapsUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-full bg-white border border-slate-200 text-slate-800 py-5 rounded-3xl font-black text-xs uppercase tracking-widest text-center shadow-sm hover:bg-slate-50 transition-all block"
+                    >
+                      Abrir no Google Maps
+                    </a>
+                  )}
+                </div>
+              </section>
+            )}
+
             {/* Mobile Contact Actions */}
-            <div className="md:hidden grid grid-cols-1 gap-3 py-4">
-              <a 
-                href={`tel:${business.phone}`}
-                className="bg-white border border-slate-200 text-slate-800 py-4 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all text-xs"
-              >
-                <Phone size={18} /> Ligar {business.phone}
-              </a>
-              <a 
-                href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/30 active:scale-95 transition-all text-xs"
-              >
-                <MessageCircle size={18} fill="white" fillOpacity={0.2} /> WhatsApp
-              </a>
-            </div>
+            {(business.phone || business.whatsapp) && (
+              <div className={cn(
+                "md:hidden grid gap-3 py-4",
+                business.phone && business.whatsapp ? "grid-cols-2" : "grid-cols-1"
+              )}>
+                {business.phone && (
+                  <a 
+                    href={`tel:${business.phone}`}
+                    className="bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-slate-900/10 active:scale-95 transition-all text-xs"
+                  >
+                    <Phone size={18} /> Ligar
+                  </a>
+                )}
+                {business.whatsapp && (
+                  <a 
+                    href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/30 active:scale-95 transition-all text-xs"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg> WhatsApp
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Reviews Section */}
             <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 space-y-6">
@@ -535,125 +623,66 @@ export default function BusinessDetailScreen() {
             </div>
 
             <div className="space-y-3">
-              <a 
-                href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-[#25D366] text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg shadow-[#25D366]/20 hover:scale-[1.02] active:scale-95 transition-all"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg> WhatsApp
-              </a>
-              <a 
-                href={`tel:${business.phone}`}
-                className="w-full bg-slate-900 text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all"
-              >
-                <Phone size={20} /> Ligar {business.phone}
-              </a>
+              {business.whatsapp && (
+                <a 
+                  href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#25D366] text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg shadow-[#25D366]/20 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg> WhatsApp
+                </a>
+              )}
+              {business.phone && (
+                <a 
+                  href={`tel:${business.phone}`}
+                  className="w-full bg-slate-900 text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  <Phone size={20} /> Ligar
+                </a>
+              )}
               {business.website && (
                 <a 
                   href={business.website} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-full bg-white border border-slate-200 text-slate-800 p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-slate-50 transition-all"
+                  className="w-full bg-white border border-slate-200 text-slate-800 p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-slate-50 transition-all font-bold"
                 >
                   <Globe size={20} /> Visitar Site
                 </a>
               )}
             </div>
           </div>
-
-          {/* Opening Hours */}
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-primary/5 rounded-2xl text-primary">
-                <Clock size={22} />
-              </div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">Horários</h2>
-            </div>
-            
-            {scheduleData ? (
-              <div className="space-y-3">
-                {DAYS_OF_WEEK.map((day) => {
-                  const dayInfo = scheduleData[day.key];
-                  const isToday = new Date().getDay() === (DAYS_OF_WEEK.findIndex(d => d.key === day.key) + 1) % 7;
-                  
-                  return (
-                    <div key={day.key} className={cn(
-                      "flex justify-between items-center text-sm py-2.5 px-4 rounded-2xl transition-colors",
-                      isToday ? "bg-primary/5 text-primary" : "text-slate-600 border border-transparent"
-                    )}>
-                      <span className={cn("font-bold", isToday ? "font-black" : "")}>{day.label}</span>
-                      <span className={cn("font-medium", dayInfo?.isOpen ? "text-slate-800" : "text-slate-400")}>
-                        {dayInfo?.isOpen ? dayInfo.hours : 'Fechado'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-slate-500 text-sm font-medium">
-                {business.openingHours || 'Entre em contato para saber os horários.'}
-              </p>
-            )}
-          </section>
-
-          {/* Location Area */}
-          <section className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-primary/5 rounded-2xl text-primary">
-                <MapPin size={22} />
-              </div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">Endereço</h2>
-            </div>
-            <div className="space-y-5">
-              <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100">
-                <p className="text-slate-700 font-bold text-sm leading-relaxed">
-                  {business.address}
-                </p>
-              </div>
-              {business.mapsUrl && (
-                <a 
-                  href={business.mapsUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full bg-white border border-slate-200 text-slate-800 py-5 rounded-3xl font-black text-xs uppercase tracking-widest text-center shadow-sm hover:bg-slate-50 transition-all block"
-                >
-                  Abrir no Google Maps
-                </a>
-              )}
-            </div>
-          </section>
         </aside>
       </div>
 
       {/* Image Preview Modal */}
       <AnimatePresence>
         {selectedImage && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedImage(null)}
-              className="absolute inset-0 bg-slate-900/90 backdrop-blur-md"
+              className="absolute inset-0 bg-black/95 backdrop-blur-xl"
             />
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-4xl aspect-video rounded-3xl overflow-hidden shadow-2xl"
-              onClick={e => e.stopPropagation()}
+              className="relative w-full h-full flex items-center justify-center p-2 md:p-10 pointer-events-none"
             >
               <img 
                 src={selectedImage} 
-                className="w-full h-full object-contain bg-slate-900"
+                className="max-w-full max-h-full object-contain pointer-events-auto shadow-2xl rounded-lg md:rounded-2xl"
                 referrerPolicy="no-referrer"
               />
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-6 right-6 p-3 bg-white/20 backdrop-blur-xl rounded-2xl text-white hover:bg-white/40 transition-all border border-white/20"
+                className="absolute top-6 right-6 p-3 bg-white/10 backdrop-blur-md rounded-2xl text-white hover:bg-white/20 transition-all border border-white/10 pointer-events-auto"
               >
                 <X size={24} />
               </button>

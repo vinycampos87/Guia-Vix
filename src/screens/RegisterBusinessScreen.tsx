@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Store, MapPin, Phone, MessageCircle, Image as ImageIcon, ChevronLeft, Save, Plus, X, Camera, Landmark, Clock, Check } from 'lucide-react';
 import { BUSINESS_CATEGORIES, VITORIA_NEIGHBORHOODS } from '../types';
 import ImageCropper from '../components/ImageCropper';
-import { cn } from '../lib/utils';
+import { cn, safeStringify } from '../lib/utils';
 
 const DAYS_OF_WEEK = [
   { key: 'seg', label: 'Segunda-feira' },
@@ -63,6 +63,7 @@ export default function RegisterBusinessScreen() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [cropper, setCropper] = useState<{ image: string; type: 'banner' | 'gallery' } | null>(null);
+  const [cropQueue, setCropQueue] = useState<string[]>([]);
 
   useEffect(() => {
     if (isEdit) {
@@ -134,20 +135,45 @@ export default function RegisterBusinessScreen() {
   }, [id, isEdit, user, navigate]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isBanner: boolean) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    if (!isBanner && formData.images.length >= 5) {
-      alert("Máximo de 5 fotos da galeria permitidas.");
-      return;
+    if (isBanner) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropper({ image: reader.result as string, type: 'banner' });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const remainingSlots = 5 - formData.images.length;
+      if (remainingSlots <= 0) {
+        alert("Máximo de 5 fotos da galeria permitidas.");
+        return;
+      }
+
+      const filesToProcess = Array.from(files).slice(0, remainingSlots);
+      const newPendingImages: string[] = [];
+
+      let processedCount = 0;
+      filesToProcess.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          newPendingImages.push(reader.result as string);
+          processedCount++;
+          
+          if (processedCount === filesToProcess.length) {
+            // Start cropping the first one from the new batch
+            setCropQueue(prev => [...prev, ...newPendingImages]);
+            if (!cropper) {
+              setCropper({ image: newPendingImages[0], type: 'gallery' });
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setCropper({ image: reader.result as string, type: isBanner ? 'banner' : 'gallery' });
-    };
-    reader.readAsDataURL(file);
-    
     // Reset input
     e.target.value = '';
   };
@@ -155,10 +181,25 @@ export default function RegisterBusinessScreen() {
   const handleCropComplete = (croppedImage: string) => {
     if (cropper?.type === 'banner') {
       setFormData(prev => ({ ...prev, bannerImage: croppedImage }));
+      setCropper(null);
     } else if (cropper?.type === 'gallery') {
       setFormData(prev => ({ ...prev, images: [...prev.images, croppedImage] }));
+      
+      // Handle queue
+      const nextQueue = cropQueue.slice(1);
+      setCropQueue(nextQueue);
+      
+      if (nextQueue.length > 0) {
+        setCropper({ image: nextQueue[0], type: 'gallery' });
+      } else {
+        setCropper(null);
+      }
     }
+  };
+
+  const cancelCrop = () => {
     setCropper(null);
+    setCropQueue([]);
   };
 
   const removeImage = (index: number) => {
@@ -223,7 +264,7 @@ export default function RegisterBusinessScreen() {
           hours: `${day.openHour}:${day.openMinute} - ${day.closeHour}:${day.closeMinute}`
         };
       });
-      const openingHoursJson = JSON.stringify(transformedSchedules);
+      const openingHoursJson = safeStringify(transformedSchedules);
 
       const businessData = {
         ...formData,
@@ -349,9 +390,9 @@ export default function RegisterBusinessScreen() {
                   <button 
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full shadow-lg transition-transform active:scale-95"
                   >
-                    <X size={12} />
+                    <X size={14} />
                   </button>
                 </div>
               ))}
@@ -371,6 +412,7 @@ export default function RegisterBusinessScreen() {
               onChange={(e) => handleImageUpload(e, false)} 
               className="hidden" 
               accept="image/*"
+              multiple
             />
           </section>
 
@@ -612,7 +654,7 @@ export default function RegisterBusinessScreen() {
             image={cropper.image}
             aspect={cropper.type === 'banner' ? 16 / 9 : 1}
             onCropComplete={handleCropComplete}
-            onCancel={() => setCropper(null)}
+            onCancel={cancelCrop}
           />
         )}
       </AnimatePresence>

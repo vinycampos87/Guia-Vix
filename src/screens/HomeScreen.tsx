@@ -77,7 +77,7 @@ export default function HomeScreen() {
         const combinedBanners = [...selectedPremium, ...selectedRegular];
         setBanners(combinedBanners);
       } catch (error) {
-        console.error("Error fetching businesses:", error);
+        console.error("Error fetching businesses:", error instanceof Error ? error.message : String(error));
       } finally {
         setLoading(false);
       }
@@ -121,7 +121,7 @@ export default function HomeScreen() {
           });
         },
         (error) => {
-          console.error("Error getting user location:", error);
+          console.error("Error getting user location:", error instanceof Error ? error.message : String(error));
         }
       );
     }

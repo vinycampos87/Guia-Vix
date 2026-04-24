@@ -91,7 +91,7 @@ export default function ProfileScreen() {
         } as Review;
       }));
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching user data:", error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ export default function ProfileScreen() {
       setItemToDelete(null);
       alert("Excluido com sucesso!");
     } catch (error) {
-      console.error("Error deleting item:", error);
+      console.error("Error deleting item:", error instanceof Error ? error.message : String(error));
       alert("Erro ao excluir item.");
     } finally {
       setIsDeleting(false);
@@ -172,7 +172,7 @@ export default function ProfileScreen() {
       setEditingReview(null);
       alert("Avaliação atualizada com sucesso!");
     } catch (error) {
-      console.error("Error updating review:", error);
+      console.error("Error updating review:", error instanceof Error ? error.message : String(error));
       alert("Erro ao atualizar avaliação.");
     } finally {
       setSavingReview(false);
@@ -194,7 +194,7 @@ export default function ProfileScreen() {
       setIsEditingProfile(false);
       alert('Perfil atualizado com sucesso!');
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error updating profile:", error instanceof Error ? error.message : String(error));
       alert('Erro ao atualizar perfil.');
     } finally {
       setSavingProfile(false);
