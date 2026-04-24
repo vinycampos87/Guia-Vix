@@ -309,18 +309,20 @@ export default function ProfileScreen() {
         </div>
         <div className="space-y-3">
           {businesses.length > 0 ? businesses.map(b => (
-            <div key={b.id} className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-              <img src={b.bannerImage} className="w-12 h-12 rounded-lg object-cover" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-gray-800 text-sm truncate">{b.name}</h4>
-                  {b.isFeatured && <Star size={12} className="text-amber-400 fill-amber-400" />}
+            <div key={b.id} className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 group relative">
+              <Link to={`/business/${b.id}`} className="flex-1 flex items-center gap-3 min-w-0">
+                <img src={b.bannerImage} className="w-12 h-12 rounded-lg object-cover" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">{b.name}</h4>
+                    {b.isFeatured && <Star size={12} className="text-amber-400 fill-amber-400" />}
+                  </div>
+                  <p className="text-gray-500 text-xs">{b.category}</p>
                 </div>
-                <p className="text-gray-500 text-xs">{b.category}</p>
-              </div>
-              <div className="flex gap-1 items-center">
+              </Link>
+              <div className="flex gap-1 items-center shrink-0">
                 <button 
-                  onClick={() => window.open(`https://wa.me/5527996063520?text=${encodeURIComponent(`Olá! Gostaria de impulsionar meu negócio: ${b.name}`)}`, '_blank')}
+                  onClick={() => window.open(`https://wa.me/5527996063520?text=${encodeURIComponent(`Olá! Gostaria de impulsionar meu negócio: ${b.name}\n\nLink: ${window.location.origin}/business/${b.id}`)}`, '_blank')}
                   className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-colors mr-2 flex items-center gap-1"
                   title="Impulsionar Negócio"
                 >
@@ -351,17 +353,19 @@ export default function ProfileScreen() {
         </div>
         <div className="space-y-3">
           {classifieds.length > 0 ? classifieds.map(c => (
-            <div key={c.id} className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                {c.images?.[0] ? <img src={c.images[0]} className="w-full h-full object-cover rounded-lg" /> : <ShoppingBag size={20} className="text-gray-400" />}
-              </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-gray-800 text-sm">{c.title}</h4>
-                <p className="text-blue-600 font-bold text-xs">{c.price || 'A combinar'}</p>
-              </div>
-              <div className="flex gap-1 items-center">
+            <div key={c.id} className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 group relative">
+              <Link to={`/classified/${c.id}`} className="flex-1 flex items-center gap-3 min-w-0">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  {c.images?.[0] ? <img src={c.images[0]} className="w-full h-full object-cover rounded-lg" /> : <ShoppingBag size={20} className="text-gray-400" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">{c.title}</h4>
+                  <p className="text-blue-600 font-bold text-xs">{c.price || 'A combinar'}</p>
+                </div>
+              </Link>
+              <div className="flex gap-1 items-center shrink-0">
                 <button 
-                  onClick={() => window.open(`https://wa.me/5527996063520?text=${encodeURIComponent(`Olá! Gostaria de impulsionar meu anúncio: ${c.title}`)}`, '_blank')}
+                  onClick={() => window.open(`https://wa.me/5527996063520?text=${encodeURIComponent(`Olá! Gostaria de impulsionar meu anúncio: ${c.title}\n\nLink: ${window.location.origin}/classified/${c.id}`)}`, '_blank')}
                   className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-colors mr-2 flex items-center gap-1"
                   title="Impulsionar Anúncio"
                 >
@@ -392,17 +396,19 @@ export default function ProfileScreen() {
         </div>
         <div className="space-y-3">
           {jobs.length > 0 ? jobs.map(j => (
-            <div key={j.id} className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                <Briefcase size={20} className="text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-gray-800 text-sm">{j.title}</h4>
-                <p className="text-gray-500 text-xs">{j.salary || 'Salário não informado'}</p>
-              </div>
-              <div className="flex gap-1 items-center">
+            <div key={j.id} className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 group relative">
+              <Link to={`/job/${j.id}`} className="flex-1 flex items-center gap-3 min-w-0">
+                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+                  <Briefcase size={20} className="text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">{j.title}</h4>
+                  <p className="text-gray-500 text-xs truncate">{j.salary || 'Salário não informado'}</p>
+                </div>
+              </Link>
+              <div className="flex gap-1 items-center shrink-0">
                 <button 
-                  onClick={() => window.open(`https://wa.me/5527996063520?text=${encodeURIComponent(`Olá! Gostaria de impulsionar minha vaga: ${j.title}`)}`, '_blank')}
+                  onClick={() => window.open(`https://wa.me/5527996063520?text=${encodeURIComponent(`Olá! Gostaria de impulsionar minha vaga: ${j.title}\n\nLink: ${window.location.origin}/job/${j.id}`)}`, '_blank')}
                   className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-colors mr-2 flex items-center gap-1"
                   title="Impulsionar Vaga"
                 >

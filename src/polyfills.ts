@@ -112,39 +112,58 @@ if (typeof window !== 'undefined') {
   const originalError = console.error;
   const originalLog = console.log;
 
-  const safeArg = (arg: any) => {
-    if (typeof arg === 'object' && arg !== null) {
-      const cache = new Set();
-      const replacer = (_key: string, value: any) => {
-        if (typeof value === 'object' && value !== null) {
-          if (cache.has(value)) return '[Circular]';
-          cache.add(value);
-          if (value instanceof Node) return `[DOM Element: ${value.nodeName}]`;
-          if (value === window) return '[Window]';
-          if (value === document) return '[Document]';
-        }
-        return value;
-      };
-      try {
-        // Create a non-circular version for logging
-        return JSON.parse(JSON.stringify(arg, replacer));
-      } catch (e) {
-        try {
-          return String(arg);
-        } catch (err) {
-          return '[Unstringifiable Object]';
-        }
-      }
+  const safeArg = (arg: any, depth = 0, seen = new WeakSet()): any => {
+    if (depth > 2) return '[Deep Object]';
+    if (typeof arg !== 'object' || arg === null) return arg;
+    if (seen.has(arg)) return '[Circular]';
+    seen.add(arg);
+
+    if (arg instanceof Error) {
+      return { name: arg.name, message: arg.message, stack: arg.stack };
     }
-    return arg;
+    if (arg instanceof Node) return `[DOM Element: ${arg.nodeName}]`;
+    if (arg === window) return '[Window]';
+    if (arg === document) return '[Document]';
+    
+    // Arrays
+    if (Array.isArray(arg)) {
+      return arg.map(x => safeArg(x, depth + 1, seen));
+    }
+
+    try {
+      const proto = Object.getPrototypeOf(arg);
+      // If it's a complex class instance (like Firebase errors or internal classes), don't try to deep clone
+      if (proto !== null && proto !== Object.prototype && proto !== Array.prototype && arg.constructor) {
+         if (typeof arg.toJSON === 'function') {
+           return safeArg(arg.toJSON(), depth + 1, seen);
+         }
+         return `[Object ${arg.constructor.name}]`;
+      }
+      
+      const result: any = {};
+      for (const k of Object.keys(arg)) {
+        result[k] = safeArg(arg[k], depth + 1, seen);
+      }
+      return result;
+    } catch (e) {
+      return '[Complex Object Error]';
+    }
   };
 
   console.error = (...args: any[]) => {
-    originalError.apply(console, args.map(safeArg));
+    try {
+      originalError.apply(console, args.map(a => safeArg(a)));
+    } catch {
+      originalError.apply(console, ['[Unloggable Error]']);
+    }
   };
 
   console.log = (...args: any[]) => {
-    originalLog.apply(console, args.map(safeArg));
+    try {
+      originalLog.apply(console, args.map(a => safeArg(a)));
+    } catch {
+      originalLog.apply(console, ['[Unloggable Message]']);
+    }
   };
 }
 
