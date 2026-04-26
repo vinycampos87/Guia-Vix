@@ -398,6 +398,15 @@ export default function HomeScreen() {
           </div>
         )}
       </section>
+      {/* Footer / Privacy Policy */}
+      <footer className="mt-8 text-center py-6 border-t border-slate-200/60">
+        <p className="text-xs text-slate-400">
+          © {new Date().getFullYear()} Guia VIX. Todos os direitos reservados.
+        </p>
+        <Link to="/privacidade" className="inline-block mt-2 text-xs text-primary font-medium hover:underline">
+          Política de Privacidade
+        </Link>
+      </footer>
     </div>
   );
 }
