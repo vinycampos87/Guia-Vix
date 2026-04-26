@@ -1,10 +1,18 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore, memoryLocalCache, getDocFromServer, doc } from 'firebase/firestore';
+import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 import firebaseConfig from '../firebase-applet-config.json';
 import { safeStringify } from './lib/utils';
 
-const app = initializeApp(firebaseConfig);
+const appConfig = { ...firebaseConfig };
+
+// Se estiver rodando no Netlify, usa o domínio do Netlify para o painel de Auth (Remove o post-15... do consentimento)
+if (window.location.hostname === 'guiavix.netlify.app' || window.location.hostname === 'www.guiavix.netlify.app') {
+  appConfig.authDomain = window.location.hostname;
+}
+
+const app = initializeApp(appConfig);
 
 // Using standard initialization with memory cache to resolve assertion errors
 export const db = initializeFirestore(app, {
@@ -12,6 +20,13 @@ export const db = initializeFirestore(app, {
 }, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
+export let messaging: any = null;
+
+isSupported().then(supported => {
+  if (supported) {
+    messaging = getMessaging(app);
+  }
+});
 
 export enum OperationType {
   CREATE = 'create',

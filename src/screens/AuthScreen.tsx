@@ -50,11 +50,14 @@ export default function AuthScreen() {
       await signInWithPopup(auth, provider);
       navigate('/profile');
     } catch (err: any) {
+      if (err.code === 'auth/popup-closed-by-user') {
+        // Silently ignore when the user simply closes the dialog
+        return;
+      }
+      
       console.error("Google Auth Error:", err.code, err.message);
       
-      if (err.code === 'auth/popup-closed-by-user') {
-        setError('Login cancelado.');
-      } else if (err.code === 'auth/popup-blocked') {
+      if (err.code === 'auth/popup-blocked') {
         setError('O popup foi bloqueado pelo navegador. Por favor, permita popups para este site.');
       } else if (err.code === 'auth/operation-not-allowed') {
         setError('O provedor Google não está ativado no Console do Firebase (Authentication > Sign-in method).');

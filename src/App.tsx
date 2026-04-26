@@ -33,6 +33,7 @@ import BusinessesScreen from './screens/BusinessesScreen';
 import ClassifiedDetailScreen from './screens/ClassifiedDetailScreen';
 import JobDetailScreen from './screens/JobDetailScreen';
 import ErrorBoundary from './components/ErrorBoundary';
+import { usePushNotifications } from './hooks/usePushNotifications';
 
 import { UserProfile, AppSettings } from './types';
 
@@ -212,6 +213,8 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  usePushNotifications();
 
   const fetchSettings = async () => {
     try {

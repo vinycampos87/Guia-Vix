@@ -180,6 +180,10 @@ service cloud.firestore {
       match /favorites/{businessId} {
         allow read, write: if isOwner(userId);
       }
+
+      match /fcmTokens/{tokenId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     match /settings/{docId} {

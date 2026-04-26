@@ -111,12 +111,27 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["businessId", "createdAt"]
+    },
+    "FcmToken": {
+      "title": "FcmToken",
+      "description": "Firebase Cloud Messaging Token for Push Notifications",
+      "type": "object",
+      "properties": {
+        "token": { "type": "string" },
+        "device": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["token", "createdAt"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles"
+    },
+    "/users/{userId}/fcmTokens/{tokenId}": {
+      "schema": "FcmToken",
+      "description": "Push notification tokens"
     },
     "/users/{userId}/favorites/{businessId}": {
       "schema": "Favorite",
