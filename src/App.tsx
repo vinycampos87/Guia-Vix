@@ -32,6 +32,7 @@ import AdminScreen from './screens/AdminScreen';
 import BusinessesScreen from './screens/BusinessesScreen';
 import ClassifiedDetailScreen from './screens/ClassifiedDetailScreen';
 import JobDetailScreen from './screens/JobDetailScreen';
+import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import ErrorBoundary from './components/ErrorBoundary';
 import { usePushNotifications } from './hooks/usePushNotifications';
 
@@ -315,6 +316,7 @@ export default function App() {
               <Route path="/business/:id" element={<BusinessDetailScreen />} />
               <Route path="/classified/:id" element={<ClassifiedDetailScreen />} />
               <Route path="/job/:id" element={<JobDetailScreen />} />
+              <Route path="/privacidade" element={<PrivacyPolicyScreen />} />
               <Route path="/classifieds" element={<ClassifiedsScreen />} />
               <Route path="/jobs" element={<JobsScreen />} />
               <Route path="/bus" element={<BusSchedulesScreen />} />
