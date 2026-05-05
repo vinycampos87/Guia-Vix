@@ -141,11 +141,13 @@ export default function JobDetailScreen() {
           </div>
           <div className="bg-slate-50/50 border border-slate-100 p-3 rounded-2xl flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-              <Landmark size={14} />
+              <MapPin size={14} />
             </div>
             <div className="min-w-0">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Cidade</span>
-              <span className="text-[11px] font-bold text-slate-700 truncate block">{job.city}</span>
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Localização</span>
+              <span className="text-[11px] font-bold text-slate-700 truncate block">
+                {job.neighborhood ? `${job.neighborhood}, ` : ''}{job.city}
+              </span>
             </div>
           </div>
         </div>

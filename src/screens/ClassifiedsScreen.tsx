@@ -25,6 +25,8 @@ export default function ClassifiedsScreen() {
     title: '',
     description: '',
     price: '',
+    city: 'Vitória',
+    neighborhood: '',
     contact: '',
     type: 'produto' as 'produto' | 'serviço',
     images: [] as string[],
@@ -56,7 +58,7 @@ export default function ClassifiedsScreen() {
       });
       setAds([{ id: docRef.id, ...newAd, ownerId: user.uid, createdAt: new Date() } as Classified, ...ads]);
       setShowAdd(false);
-      setNewAd({ title: '', description: '', price: '', contact: '', type: 'produto', images: [] });
+      setNewAd({ title: '', description: '', price: '', city: 'Vitória', neighborhood: '', contact: '', type: 'produto', images: [] });
     } catch (error) {
       console.error("Error adding ad:", error);
     }
@@ -194,7 +196,12 @@ export default function ClassifiedsScreen() {
                     <h3 className="font-bold text-slate-800 text-[10px] line-clamp-1 leading-tight">{ad.title}</h3>
                   </div>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-[7px] font-black text-primary uppercase tracking-tighter bg-primary/5 px-1.5 py-0.5 rounded-full">Detalhes</span>
+                    <div className="flex flex-col">
+                      <span className="text-[7px] font-black text-primary uppercase tracking-tighter bg-primary/5 px-1.5 py-0.5 rounded-full w-fit">Detalhes</span>
+                      <span className="text-[6px] text-slate-400 font-bold mt-1 uppercase tracking-tighter truncate max-w-[60px]">
+                        {ad.neighborhood || ad.city || 'Vitória'}
+                      </span>
+                    </div>
                     <Phone size={8} className="text-slate-400" />
                   </div>
                 </div>
@@ -272,22 +279,55 @@ export default function ClassifiedsScreen() {
                   required
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    placeholder="Somente números (ex: 50)"
-                    value={newAd.price}
-                    onChange={e => setNewAd({...newAd, price: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Contato (WhatsApp)"
-                    value={newAd.contact}
-                    onChange={e => setNewAd({...newAd, contact: e.target.value})}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cidade</label>
+                    <select
+                      value={newAd.city}
+                      onChange={e => setNewAd({...newAd, city: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 text-sm"
+                      required
+                    >
+                      {['Vitória', 'Vila Velha', 'Serra', 'Cariacica', 'Guarapari', 'Viana', 'Fundão'].map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bairro</label>
+                    <input
+                      type="text"
+                      placeholder="Nome do bairro"
+                      value={newAd.neighborhood}
+                      onChange={e => setNewAd({...newAd, neighborhood: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 text-sm"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Preço (Opcional)</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="Somente números"
+                      value={newAd.price}
+                      onChange={e => setNewAd({...newAd, price: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp</label>
+                    <input
+                      type="tel"
+                      placeholder="27999887766"
+                      value={newAd.contact}
+                      onChange={e => setNewAd({...newAd, contact: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 text-sm"
+                      required
+                    />
+                  </div>
                 </div>
                 
                 <div className="space-y-4 pt-2">

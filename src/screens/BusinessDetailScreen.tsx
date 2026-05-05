@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { doc, getDoc, collection, setDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, Info, Send, User as UserIcon, Mail, X, Heart, Edit2, Trash2, Save } from 'lucide-react';
+import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, Info, Send, User as UserIcon, Mail, X, Heart, Edit2, Trash2, Save, Landmark } from 'lucide-react';
 import { Business, Review } from '../types';
 import { useAuth } from '../App';
 import { cn } from '../lib/utils';
@@ -441,8 +441,11 @@ export default function BusinessDetailScreen() {
                 </div>
                 <div className="space-y-5">
                   <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100">
-                    <p className="text-slate-700 font-bold text-sm leading-relaxed">
+                    <p className="text-slate-700 font-bold text-sm leading-relaxed mb-1">
                       {business.address}
+                    </p>
+                    <p className="text-primary font-black text-[10px] uppercase tracking-widest flex items-center gap-1">
+                      <Landmark size={12} /> {business.neighborhood}, {business.city || 'Vitória'}
                     </p>
                   </div>
                   {business.mapsUrl && (

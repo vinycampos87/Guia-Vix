@@ -155,6 +155,10 @@ export default function ClassifiedDetailScreen() {
               <h1 className="text-2xl font-black text-slate-800 tracking-tight leading-tight">
                 {ad.title}
               </h1>
+              <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2 bg-slate-50 w-fit px-3 py-1 rounded-full border border-slate-100">
+                <MapPin size={10} className="text-primary" />
+                {ad.neighborhood ? `${ad.neighborhood}, ` : ''}{ad.city || 'Vitória'}
+              </div>
             </div>
           </div>
 

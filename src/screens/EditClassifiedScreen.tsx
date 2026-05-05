@@ -18,6 +18,8 @@ export default function EditClassifiedScreen() {
     title: '',
     description: '',
     price: '',
+    city: '',
+    neighborhood: '',
     contact: '',
     type: 'produto' as 'produto' | 'serviço',
     images: [] as string[],
@@ -42,6 +44,8 @@ export default function EditClassifiedScreen() {
             title: data.title,
             description: data.description,
             price: data.price || '',
+            city: data.city || 'Vitória',
+            neighborhood: data.neighborhood || '',
             contact: data.contact,
             type: data.type || 'produto',
             images: data.images || [],
@@ -102,9 +106,22 @@ export default function EditClassifiedScreen() {
         updatedAt: serverTimestamp(),
       }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `classifieds/${id}`); });
       navigate('/profile');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating ad:", error);
-      alert("Erro ao atualizar o anúncio.");
+      let errorMessage = "Erro ao atualizar o anúncio.";
+      
+      try {
+        const errorInfo = JSON.parse(error.message);
+        if (errorInfo.error.includes('Missing or insufficient permissions')) {
+          errorMessage = "Erro de Permissão: Os dados não correspondem ao formato exigido ou você não tem permissão para esta ação.";
+        } else {
+          errorMessage = `Erro: ${errorInfo.error}`;
+        }
+      } catch (e) {
+        if (error.message) errorMessage = `Erro: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -216,6 +233,33 @@ export default function EditClassifiedScreen() {
               className="w-full mt-1 px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-medium text-slate-700 min-h-[120px]"
               required
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cidade</label>
+              <select
+                value={formData.city}
+                onChange={e => setFormData({...formData, city: e.target.value})}
+                className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-bold text-slate-800 text-sm"
+                required
+              >
+                {['Vitória', 'Vila Velha', 'Serra', 'Cariacica', 'Guarapari', 'Viana', 'Fundão'].map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bairro</label>
+              <input
+                type="text"
+                placeholder="Nome do bairro"
+                value={formData.neighborhood}
+                onChange={e => setFormData({...formData, neighborhood: e.target.value})}
+                className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-bold text-slate-800 text-sm"
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

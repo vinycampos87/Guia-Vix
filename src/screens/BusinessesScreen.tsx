@@ -22,7 +22,7 @@ import {
   X,
   Heart
 } from 'lucide-react';
-import { Business, BUSINESS_CATEGORIES, VITORIA_NEIGHBORHOODS } from '../types';
+import { Business, BUSINESS_CATEGORIES, ES_CITIES } from '../types';
 import { cn, isBoosted, calculateDistance, formatDistance } from '../lib/utils';
 import { useFavorites } from '../hooks/useFavorites';
 
@@ -45,7 +45,7 @@ export default function BusinessesScreen() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState<string>('Todos os Bairros');
+  const [selectedCity, setSelectedCity] = useState<string>('Todas as Cidades');
   const [showFilters, setShowFilters] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { favorites, toggleFavorite } = useFavorites();
@@ -85,10 +85,11 @@ export default function BusinessesScreen() {
       const normSearch = normalize(searchTerm);
       const matchesSearch = !searchTerm || 
                             normalize(b.name).includes(normSearch) || 
-                            normalize(b.description || '').includes(normSearch);
+                            normalize(b.description || '').includes(normSearch) ||
+                            normalize(b.neighborhood || '').includes(normSearch);
       const matchesCategory = !selectedCategory || b.category === selectedCategory;
-      const matchesNeighborhood = selectedNeighborhood === 'Todos os Bairros' || b.neighborhood === selectedNeighborhood;
-      return matchesSearch && matchesCategory && matchesNeighborhood;
+      const matchesCity = selectedCity === 'Todas as Cidades' || b.city === selectedCity;
+      return matchesSearch && matchesCategory && matchesCity;
     });
 
     return [...filtered].sort((a, b) => {
@@ -109,7 +110,7 @@ export default function BusinessesScreen() {
       const bTime = b.createdAt?.seconds || 0;
       return bTime - aTime;
     });
-  }, [businesses, searchTerm, selectedCategory, selectedNeighborhood, userLocation]);
+  }, [businesses, searchTerm, selectedCategory, selectedCity, userLocation]);
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50 overflow-x-hidden pb-32">
@@ -120,7 +121,7 @@ export default function BusinessesScreen() {
             <ChevronLeft size={20} />
           </button>
           <div className="flex-1">
-            <h1 className="text-xl font-black text-slate-800 tracking-tight">Empresas em Vitória</h1>
+            <h1 className="text-xl font-black text-slate-800 tracking-tight">Empresas na Grande Vitória</h1>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Explore o comércio local</p>
           </div>
         </div>
@@ -137,19 +138,18 @@ export default function BusinessesScreen() {
           />
         </div>
 
-        {/* Neighborhood Selector */}
-        <div className="relative">
-          <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={16} />
-          <select
-            value={selectedNeighborhood}
-            onChange={(e) => setSelectedNeighborhood(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-primary/5 border border-primary/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all font-black text-[11px] uppercase tracking-widest text-primary appearance-none"
-          >
-            <option value="Todos os Bairros">Todos os Bairros</option>
-            {VITORIA_NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Filter size={14} className="text-primary" />
+        {/* City/Neighborhood Selector Row */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={16} />
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-primary/5 border border-primary/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all font-black text-[11px] uppercase tracking-widest text-primary appearance-none"
+            >
+              <option value="Todas as Cidades">Todas as Cidades</option>
+              {ES_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
         </div>
       </div>
@@ -250,7 +250,7 @@ export default function BusinessesScreen() {
                           {userLocation && b.latitude ? (
                             <span className="text-primary font-black">{formatDistance(calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude))} • </span>
                           ) : null}
-                          {b.neighborhood || 'Vitória, ES'}
+                          {b.neighborhood || b.city || 'ES'}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mt-2">
@@ -276,7 +276,7 @@ export default function BusinessesScreen() {
               onClick={() => {
                 setSearchTerm('');
                 setSelectedCategory(null);
-                setSelectedNeighborhood('Todos os Bairros');
+                setSelectedCity('Todas as Cidades');
               }}
               className="mt-6 text-primary font-black text-[10px] uppercase tracking-widest underline underline-offset-4"
             >

@@ -16,6 +16,7 @@ export default function EditJobScreen() {
     title: '',
     companyName: '',
     city: ES_CITIES[0],
+    neighborhood: '',
     description: '',
     salary: '',
     contact: '',
@@ -41,6 +42,7 @@ export default function EditJobScreen() {
             title: data.title,
             companyName: data.companyName || '',
             city: data.city || ES_CITIES[0],
+            neighborhood: data.neighborhood || '',
             description: data.description,
             salary: data.salary || '',
             contact: data.contact,
@@ -70,9 +72,22 @@ export default function EditJobScreen() {
         updatedAt: serverTimestamp(),
       }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `jobs/${id}`); });
       navigate('/profile');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating job:", error);
-      alert("Erro ao atualizar a vaga.");
+      let errorMessage = "Erro ao atualizar a vaga.";
+      
+      try {
+        const errorInfo = JSON.parse(error.message);
+        if (errorInfo.error.includes('Missing or insufficient permissions')) {
+          errorMessage = "Erro de Permissão: Os dados não correspondem ao formato exigido ou você não tem permissão para esta ação.";
+        } else {
+          errorMessage = `Erro: ${errorInfo.error}`;
+        }
+      } catch (e) {
+        if (error.message) errorMessage = `Erro: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -132,6 +147,20 @@ export default function EditJobScreen() {
                   {ES_CITIES.map(city => <option key={city} value={city}>{city}</option>)}
                 </select>
               </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bairro</label>
+              <input
+                type="text"
+                placeholder="Nome do bairro"
+                value={formData.neighborhood}
+                onChange={e => setFormData({...formData, neighborhood: e.target.value})}
+                className="w-full mt-1 px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-bold text-slate-800"
+                required
+              />
             </div>
           </div>
 

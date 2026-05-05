@@ -46,6 +46,7 @@
         "isFeatured": { "type": "boolean" },
         "boostExpiresAt": { "type": "string", "format": "date-time" },
         "neighborhood": { "type": "string" },
+        "city": { "type": "string" },
         "ownerId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
@@ -76,6 +77,8 @@
         "price": { "type": "string" },
         "contact": { "type": "string" },
         "images": { "type": "array", "items": { "type": "string" } },
+        "city": { "type": "string" },
+        "neighborhood": { "type": "string" },
         "boostExpiresAt": { "type": "string", "format": "date-time" },
         "ownerId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -88,8 +91,11 @@
       "type": "object",
       "properties": {
         "title": { "type": "string" },
+        "companyName": { "type": "string" },
         "description": { "type": "string" },
         "salary": { "type": "string" },
+        "city": { "type": "string" },
+        "neighborhood": { "type": "string" },
         "contact": { "type": "string" },
         "whatsapp": { "type": "string" },
         "email": { "type": "string", "format": "email" },

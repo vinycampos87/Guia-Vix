@@ -38,6 +38,7 @@ export interface Business {
   isFeatured?: boolean;
   boostExpiresAt?: any;
   neighborhood?: string;
+  city?: string;
   latitude?: number;
   longitude?: number;
   website?: string;
@@ -64,6 +65,8 @@ export interface Classified {
   type: 'produto' | 'serviço';
   images: string[];
   boostExpiresAt?: any;
+  city?: string;
+  neighborhood?: string;
   ownerId: string;
   createdAt: any;
 }
@@ -73,6 +76,7 @@ export interface Job {
   title: string;
   companyName: string;
   city: string;
+  neighborhood?: string;
   description: string;
   salary?: string;
   contact: string;
@@ -110,87 +114,7 @@ export const ES_CITIES = [
   "Vila Velha",
   "Serra",
   "Cariacica",
-  "Viana",
   "Guarapari",
-  "Fundão",
-  "Anchieta",
-  "Outra"
-];
-
-export const VITORIA_NEIGHBORHOODS = [
-  "Aeroporto",
-  "Andorinhas",
-  "Antônio Honório",
-  "Ariovaldo Favalessa",
-  "Barro Vermelho",
-  "Bela Vista",
-  "Bento Ferreira",
-  "Boa Vista",
-  "Bonfim",
-  "Caratoíra",
-  "Centro",
-  "Comdusa",
-  "Conquista",
-  "Consolação",
-  "Cruzamento",
-  "Da Penha",
-  "De Lourdes",
-  "Do Cabral",
-  "Do Quadro",
-  "Enseada do Suá",
-  "Estrelinha",
-  "Fonte Grande",
-  "Forte São João",
-  "Fradinhos",
-  "Goiabeiras",
-  "Grand Vitória",
-  "Guruigica",
-  "Horário de Verão",
-  "Ilha das Caieiras",
-  "Ilha de Santa Maria",
-  "Ilha do Boi",
-  "Ilha do Frade",
-  "Ilha do Príncipe",
-  "Inhanguetá",
-  "Itararé",
-  "Jabour",
-  "Jardim Camburi",
-  "Jardim da Penha",
-  "Jesus de Nazareth",
-  "Joana D'Arc",
-  "Jucutuquara",
-  "Maria Ortiz",
-  "Maruípe",
-  "Mata da Praia",
-  "Monte Belo",
-  "Morada de Camburi",
-  "Mário Cypreste",
-  "Nazareth",
-  "Nova Palestina",
-  "Parque Moscoso",
-  "Piedade",
-  "Pontal de Camburi",
-  "Praia do Canto",
-  "Praia do Suá",
-  "Redenção",
-  "República",
-  "Resistência",
-  "Romão",
-  "Santa Cecília",
-  "Santa Clara",
-  "Santa Helena",
-  "Santa Lúcia",
-  "Santa Luíza",
-  "Santa Martha",
-  "Santa Teresa",
-  "Santo Antônio",
-  "Santos Dumont",
-  "São Benedito",
-  "São Cristóvão",
-  "São José",
-  "São Pedro",
-  "Solon Borges",
-  "Tabuazeiro",
-  "Universitário",
-  "Vila Rubim"
+  "Viana",
+  "Fundão"
 ];

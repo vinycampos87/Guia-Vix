@@ -24,6 +24,7 @@ export default function JobsScreen() {
     title: '',
     companyName: '',
     city: ES_CITIES[0],
+    neighborhood: '',
     description: '',
     salary: '',
     contact: '',
@@ -54,7 +55,7 @@ export default function JobsScreen() {
       const docRef = await addDoc(collection(db, 'jobs'), jobToSave);
       setJobs([{ id: docRef.id, ...newJob, ownerId: user.uid, createdAt: new Date() } as Job, ...jobs]);
       setShowAdd(false);
-      setNewJob({ title: '', companyName: '', city: ES_CITIES[0], description: '', salary: '', contact: '', whatsapp: '', email: '' });
+      setNewJob({ title: '', companyName: '', city: ES_CITIES[0], neighborhood: '', description: '', salary: '', contact: '', whatsapp: '', email: '' });
     } catch (error) {
       console.error("Error adding job:", error);
     }
@@ -181,7 +182,7 @@ export default function JobsScreen() {
                       </div>
                       <div className="flex items-center gap-1">
                         <MapPin size={14} />
-                        <span>{job.city || 'Vitória, ES'}</span>
+                        <span>{job.neighborhood ? `${job.neighborhood}, ` : ''}{job.city || 'Vitória'}</span>
                       </div>
                     </div>
                   </div>
@@ -390,6 +391,20 @@ export default function JobsScreen() {
                           {ES_CITIES.map(city => <option key={city} value={city}>{city}</option>)}
                         </select>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bairro</label>
+                      <input
+                        type="text"
+                        placeholder="Nome do bairro"
+                        value={newJob.neighborhood}
+                        onChange={e => setNewJob({...newJob, neighborhood: e.target.value})}
+                        className="w-full mt-1 px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-bold text-slate-800"
+                        required
+                      />
                     </div>
                   </div>
 

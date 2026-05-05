@@ -71,6 +71,10 @@ service cloud.firestore {
         );
     }
 
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+
     function isBlocked() {
       return isAuthenticated() && 
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
@@ -124,8 +128,11 @@ service cloud.firestore {
              (!('isFeatured' in data) || data.isFeatured is bool) &&
              (!('boostExpiresAt' in data) || data.boostExpiresAt == null || data.boostExpiresAt is timestamp) &&
              (!('neighborhood' in data) || data.neighborhood is string) &&
+             (!('city' in data) || data.city is string) &&
              (!('rating' in data) || data.rating is number) &&
              (!('reviewCount' in data) || data.reviewCount is number) &&
+             (!('latitude' in data) || data.latitude == null || data.latitude is number) &&
+             (!('longitude' in data) || data.longitude == null || data.longitude is number) &&
              (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
 
@@ -145,6 +152,8 @@ service cloud.firestore {
              data.contact is string &&
              data.type in ['produto', 'serviço'] &&
              data.images is list && data.images.size() <= 6 &&
+             (!('city' in data) || data.city is string) &&
+             (!('neighborhood' in data) || data.neighborhood is string) &&
              (!('boostExpiresAt' in data) || data.boostExpiresAt == null || data.boostExpiresAt is timestamp) &&
              data.ownerId is string &&
              data.createdAt is timestamp;
@@ -154,6 +163,7 @@ service cloud.firestore {
       return data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
              data.companyName is string && data.companyName.size() > 0 &&
              data.city is string && data.city.size() > 0 &&
+             (!('neighborhood' in data) || data.neighborhood is string) &&
              data.description is string && data.description.size() > 0 && data.description.size() < 5000 &&
              (!('salary' in data) || data.salary is string) &&
              data.contact is string &&

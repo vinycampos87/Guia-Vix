@@ -5,7 +5,7 @@ import { useAuth } from '../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Store, MapPin, Phone, MessageCircle, Image as ImageIcon, ChevronLeft, Save, Plus, X, Camera, Landmark, Clock, Check } from 'lucide-react';
-import { BUSINESS_CATEGORIES, VITORIA_NEIGHBORHOODS } from '../types';
+import { BUSINESS_CATEGORIES, ES_CITIES } from '../types';
 import ImageCropper from '../components/ImageCropper';
 import { cn, safeStringify } from '../lib/utils';
 
@@ -39,6 +39,7 @@ export default function RegisterBusinessScreen() {
     email: '',
     address: '',
     neighborhood: '',
+    city: '',
     mapsUrl: '',
     openingHours: '',
     bannerImage: '',
@@ -85,6 +86,7 @@ export default function RegisterBusinessScreen() {
               email: data.email || '',
               address: data.address,
               neighborhood: data.neighborhood || '',
+              city: data.city || '',
               mapsUrl: data.mapsUrl || '',
               openingHours: data.openingHours || '',
               bannerImage: data.bannerImage,
@@ -247,8 +249,13 @@ export default function RegisterBusinessScreen() {
       return;
     }
 
+    if (!formData.city) {
+      alert("Por favor, selecione uma cidade.");
+      return;
+    }
+
     if (!formData.neighborhood) {
-      alert("Por favor, selecione um bairro.");
+      alert("Por favor, digite o bairro.");
       return;
     }
 
@@ -282,9 +289,22 @@ export default function RegisterBusinessScreen() {
         }).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'businesses'); });
       }
       navigate('/profile');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving business:", error);
-      alert("Erro ao salvar negócio. Verifique os campos e tente novamente.");
+      let errorMessage = "Erro ao salvar negócio. Verifique os campos e tente novamente.";
+      
+      try {
+        const errorInfo = JSON.parse(error.message);
+        if (errorInfo.error.includes('Missing or insufficient permissions')) {
+          errorMessage = "Erro de Permissão: Os dados não correspondem ao formato exigido ou você não tem permissão para esta ação. Certifique-se de que o banner e campos obrigatórios estão preenchidos.";
+        } else {
+          errorMessage = `Erro: ${errorInfo.error}`;
+        }
+      } catch (e) {
+        if (error.message) errorMessage = `Erro: ${error.message}`;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -469,18 +489,34 @@ export default function RegisterBusinessScreen() {
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bairro</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cidade</label>
               <div className="relative mt-1">
                 <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
                 <select
-                  value={formData.neighborhood}
-                  onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary transition-all font-bold text-slate-800 appearance-none"
                   required
                 >
-                  <option value="" disabled>Selecione o Bairro</option>
-                  {VITORIA_NEIGHBORHOODS.map(n => <option key={n} value={n}>{n}</option>)}
+                  <option value="" disabled>Selecione a Cidade</option>
+                  {ES_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bairro</label>
+              <div className="relative mt-1">
+                <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 disabled:opacity-50" size={18} />
+                <input
+                  type="text"
+                  value={formData.neighborhood}
+                  onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary transition-all font-bold text-slate-800 disabled:opacity-50"
+                  placeholder="Digite o nome do bairro"
+                  required
+                  disabled={!formData.city}
+                />
               </div>
             </div>
 
