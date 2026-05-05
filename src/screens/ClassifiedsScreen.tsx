@@ -55,12 +55,27 @@ export default function ClassifiedsScreen() {
         ...newAd,
         ownerId: user.uid,
         createdAt: serverTimestamp(),
-      });
+      }).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'classifieds'); });
       setAds([{ id: docRef.id, ...newAd, ownerId: user.uid, createdAt: new Date() } as Classified, ...ads]);
       setShowAdd(false);
       setNewAd({ title: '', description: '', price: '', city: 'Vitória', neighborhood: '', contact: '', type: 'produto', images: [] });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding ad:", error);
+      let errorMessage = "Erro ao publicar anúncio. Tente novamente.";
+      
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Os dados não conferem com as regras do sistema. Preencha todos os campos corretamente.";
+          } else {
+            errorMessage = `Erro: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
+        }
+      }
+      alert(errorMessage);
     }
   };
 

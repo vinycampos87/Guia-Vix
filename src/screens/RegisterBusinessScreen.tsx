@@ -44,8 +44,8 @@ export default function RegisterBusinessScreen() {
     openingHours: '',
     bannerImage: '',
     images: [] as string[],
-    latitude: undefined as number | undefined,
-    longitude: undefined as number | undefined,
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   const [daySchedules, setDaySchedules] = useState<Record<string, { isOpen: boolean; openHour: string; openMinute: string; closeHour: string; closeMinute: string }>>(
@@ -273,35 +273,49 @@ export default function RegisterBusinessScreen() {
       });
       const openingHoursJson = safeStringify(transformedSchedules);
 
-      const businessData = {
+      const dataToSave = {
         ...formData,
+        latitude: formData.latitude ?? null,
+        longitude: formData.longitude ?? null,
         openingHours: openingHoursJson,
         ownerId: user.uid,
         updatedAt: serverTimestamp(),
       };
 
       if (isEdit) {
-        await updateDoc(doc(db, 'businesses', id), businessData).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
+        await updateDoc(doc(db, 'businesses', id), dataToSave).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
       } else {
         await addDoc(collection(db, 'businesses'), {
-          ...businessData,
+          ...dataToSave,
           createdAt: serverTimestamp(),
         }).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'businesses'); });
       }
       navigate('/profile');
     } catch (error: any) {
       console.error("Error saving business:", error);
-      let errorMessage = "Erro ao salvar negócio. Verifique os campos e tente novamente.";
+      let errorMessage = "Ocorreu um erro ao salvar os dados. Por favor, tente novamente.";
       
-      try {
-        const errorInfo = JSON.parse(error.message);
-        if (errorInfo.error.includes('Missing or insufficient permissions')) {
-          errorMessage = "Erro de Permissão: Os dados não correspondem ao formato exigido ou você não tem permissão para esta ação. Certifique-se de que o banner e campos obrigatórios estão preenchidos.";
-        } else {
-          errorMessage = `Erro: ${errorInfo.error}`;
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          const rawError = errorInfo.error || '';
+          
+          if (rawError.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Os dados não conferem com as regras de segurança ou você não tem permissão para esta ação. Certifique-se de que todos os campos obrigatórios estão preenchidos corretamente.";
+          } else if (rawError.includes('Unsupported field value: undefined')) {
+            errorMessage = "Erro de Dados: Algum campo obrigatório não foi preenchido corretamente (valor indefinido). Tente recarregar a página.";
+          } else if (rawError.includes('quota exceeded')) {
+            errorMessage = "Limite Excedido: O limite diário de uso do sistema foi atingido. Tente novamente amanhã.";
+          } else {
+            errorMessage = `Detalhes do erro: ${rawError}`;
+          }
+        } catch (e) {
+          if (error.message.includes('addDoc() called with invalid data')) {
+            errorMessage = "Erro de Dados: Existem campos vazios ou inválidos no formulário. Verifique as fotos e a localização.";
+          } else {
+            errorMessage = `Erro: ${error.message}`;
+          }
         }
-      } catch (e) {
-        if (error.message) errorMessage = `Erro: ${error.message}`;
       }
       
       alert(errorMessage);

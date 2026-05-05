@@ -52,12 +52,27 @@ export default function JobsScreen() {
         ownerId: user.uid,
         createdAt: serverTimestamp(),
       };
-      const docRef = await addDoc(collection(db, 'jobs'), jobToSave);
+      const docRef = await addDoc(collection(db, 'jobs'), jobToSave).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'jobs'); });
       setJobs([{ id: docRef.id, ...newJob, ownerId: user.uid, createdAt: new Date() } as Job, ...jobs]);
       setShowAdd(false);
       setNewJob({ title: '', companyName: '', city: ES_CITIES[0], neighborhood: '', description: '', salary: '', contact: '', whatsapp: '', email: '' });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding job:", error);
+      let errorMessage = "Erro ao publicar vaga. Tente novamente.";
+      
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Os dados não conferem com as regras do sistema. Preencha todos os campos corretamente.";
+          } else {
+            errorMessage = `Erro: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
+        }
+      }
+      alert(errorMessage);
     }
   };
 

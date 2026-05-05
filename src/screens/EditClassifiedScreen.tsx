@@ -110,15 +110,17 @@ export default function EditClassifiedScreen() {
       console.error("Error updating ad:", error);
       let errorMessage = "Erro ao atualizar o anúncio.";
       
-      try {
-        const errorInfo = JSON.parse(error.message);
-        if (errorInfo.error.includes('Missing or insufficient permissions')) {
-          errorMessage = "Erro de Permissão: Os dados não correspondem ao formato exigido ou você não tem permissão para esta ação.";
-        } else {
-          errorMessage = `Erro: ${errorInfo.error}`;
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Os dados não conferem com as regras do sistema. Preencha todos os campos corretamente.";
+          } else {
+            errorMessage = `Erro: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
         }
-      } catch (e) {
-        if (error.message) errorMessage = `Erro: ${error.message}`;
       }
       
       alert(errorMessage);
