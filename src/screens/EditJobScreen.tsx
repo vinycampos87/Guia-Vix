@@ -67,13 +67,18 @@ export default function EditJobScreen() {
     
     setLoading(true);
     try {
-      await updateDoc(doc(db, 'jobs', id), {
+      const payload = {
         ...formData,
         updatedAt: serverTimestamp(),
-      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `jobs/${id}`); });
+      };
+      Object.keys(payload).forEach(k => {
+        if ((payload as any)[k] === undefined) delete (payload as any)[k];
+      });
+
+      await updateDoc(doc(db, 'jobs', id), payload).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `jobs/${id}`); });
       navigate('/profile');
     } catch (error: any) {
-      console.error("Error updating job:", error);
+      console.error("Error updating job:", error instanceof Error ? error.message : String(error));
       let errorMessage = "Erro ao atualizar a vaga.";
       
       if (error.message) {

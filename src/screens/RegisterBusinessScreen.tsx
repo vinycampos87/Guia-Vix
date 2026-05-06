@@ -226,7 +226,7 @@ export default function RegisterBusinessScreen() {
         },
         (error) => {
           setLoading(false);
-          console.error("Error detecting location:", error);
+          console.error("Error detecting location:", error instanceof Error ? error.message : String(error));
           alert("Não foi possível detectar sua localização. Certifique-se de que a permissão foi concedida.");
         }
       );
@@ -282,6 +282,13 @@ export default function RegisterBusinessScreen() {
         updatedAt: serverTimestamp(),
       };
 
+      // Strip any undefined values to prevent synchronous Firestore errors
+      Object.keys(dataToSave).forEach(key => {
+        if ((dataToSave as any)[key] === undefined) {
+          delete (dataToSave as any)[key];
+        }
+      });
+
       if (isEdit) {
         await updateDoc(doc(db, 'businesses', id), dataToSave).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
       } else {
@@ -292,7 +299,7 @@ export default function RegisterBusinessScreen() {
       }
       navigate('/profile');
     } catch (error: any) {
-      console.error("Error saving business:", error);
+      console.error("Error saving business:", error instanceof Error ? error.message : String(error));
       let errorMessage = "Ocorreu um erro ao salvar os dados. Por favor, tente novamente.";
       
       if (error.message) {

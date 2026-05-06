@@ -101,13 +101,18 @@ export default function EditClassifiedScreen() {
 
     setLoading(true);
     try {
-      await updateDoc(doc(db, 'classifieds', id), {
+      const payload = {
         ...formData,
         updatedAt: serverTimestamp(),
-      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `classifieds/${id}`); });
+      };
+      Object.keys(payload).forEach(k => {
+        if ((payload as any)[k] === undefined) delete (payload as any)[k];
+      });
+
+      await updateDoc(doc(db, 'classifieds', id), payload).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `classifieds/${id}`); });
       navigate('/profile');
     } catch (error: any) {
-      console.error("Error updating ad:", error);
+      console.error("Error updating ad:", error instanceof Error ? error.message : String(error));
       let errorMessage = "Erro ao atualizar o anúncio.";
       
       if (error.message) {

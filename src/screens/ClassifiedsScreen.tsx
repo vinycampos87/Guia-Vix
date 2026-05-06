@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { db } from '../firebase';
+import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { useAuth } from '../App';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,7 +20,7 @@ export default function ClassifiedsScreen() {
   const normalize = (text: string) => 
     text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  const [cropperImage, setCropperImage] = useState<string | null>(null);
+  const [imageQueue, setImageQueue] = useState<string[]>([]);
   const [newAd, setNewAd] = useState({
     title: '',
     description: '',
@@ -51,16 +51,22 @@ export default function ClassifiedsScreen() {
     }
 
     try {
-      const docRef = await addDoc(collection(db, 'classifieds'), {
+      const adToSave = {
         ...newAd,
         ownerId: user.uid,
         createdAt: serverTimestamp(),
-      }).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'classifieds'); });
+      };
+      
+      Object.keys(adToSave).forEach(k => {
+        if ((adToSave as any)[k] === undefined) delete (adToSave as any)[k];
+      });
+
+      const docRef = await addDoc(collection(db, 'classifieds'), adToSave).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'classifieds'); });
       setAds([{ id: docRef.id, ...newAd, ownerId: user.uid, createdAt: new Date() } as Classified, ...ads]);
       setShowAdd(false);
       setNewAd({ title: '', description: '', price: '', city: 'Vitória', neighborhood: '', contact: '', type: 'produto', images: [] });
     } catch (error: any) {
-      console.error("Error adding ad:", error);
+      console.error("Error adding ad:", error instanceof Error ? error.message : String(error));
       let errorMessage = "Erro ao publicar anúncio. Tente novamente.";
       
       if (error.message) {
@@ -80,24 +86,46 @@ export default function ClassifiedsScreen() {
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10000000) { // 10MB limit
-        alert("A imagem é muito grande. Escolha uma imagem de até 10MB.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCropperImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      e.target.value = '';
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    
+    const remainingSlots = 5 - newAd.images.length;
+    let filesToProcess = files;
+    if (files.length > remainingSlots) {
+      alert(`Você só pode adicionar mais ${remainingSlots} foto(s).`);
+      filesToProcess = files.slice(0, remainingSlots);
     }
+    
+    const validFiles = filesToProcess.filter(f => {
+      if (f.size > 10000000) {
+        alert("Uma das imagens é muito grande (limite 10MB).");
+        return false;
+      }
+      return true;
+    });
+
+    const readFiles = validFiles.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readFiles).then(results => {
+      setImageQueue(prev => [...prev, ...results]);
+    });
+
+    e.target.value = '';
   };
 
   const handleCropComplete = (croppedImage: string) => {
     setNewAd(prev => ({ ...prev, images: [...prev.images, croppedImage] }));
-    setCropperImage(null);
+    setImageQueue(prev => prev.slice(1));
+  };
+
+  const handleCropCancel = () => {
+    setImageQueue(prev => prev.slice(1));
   };
 
   const removeImage = (index: number) => {
@@ -373,6 +401,7 @@ export default function ClassifiedsScreen() {
                         <input
                           type="file"
                           accept="image/jpeg, image/png"
+                          multiple
                           onChange={handleImageUpload}
                           className="hidden"
                           disabled={uploading}
@@ -414,12 +443,13 @@ export default function ClassifiedsScreen() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {cropperImage && (
+        {imageQueue.length > 0 && (
           <ImageCropper
-            image={cropperImage}
+            key={imageQueue[0]}
+            image={imageQueue[0]}
             aspect={4 / 3}
             onCropComplete={handleCropComplete}
-            onCancel={() => setCropperImage(null)}
+            onCancel={handleCropCancel}
           />
         )}
       </AnimatePresence>

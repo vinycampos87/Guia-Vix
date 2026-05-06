@@ -60,7 +60,7 @@ export default function BusinessesScreen() {
         const querySnapshot = await getDocs(q).catch(e => { throw handleFirestoreError(e, OperationType.LIST, 'businesses'); });
         setBusinesses(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business)));
       } catch (error) {
-        console.error("Error fetching businesses:", error);
+        console.error("Error fetching businesses:", error instanceof Error ? error.message : String(error));
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ export default function BusinessesScreen() {
             lng: position.coords.longitude
           });
         },
-        (error) => console.error("Error getting user location:", error)
+        (error) => console.error("Error getting user location:", error instanceof Error ? error.message : String(error))
       );
     }
   }, []);

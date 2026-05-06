@@ -126,7 +126,7 @@ export default function ProfileScreen() {
         await updateDoc(doc(db, 'businesses', businessId), {
           rating: newRating,
           reviewCount: newCount
-        });
+        }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${businessId}`); });
 
         setReviews(prev => prev.filter(r => r.id !== id || r.businessId !== businessId));
       } else {
@@ -137,9 +137,23 @@ export default function ProfileScreen() {
       }
       setItemToDelete(null);
       alert("Excluido com sucesso!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting item:", error instanceof Error ? error.message : String(error));
-      alert("Erro ao excluir item.");
+      let errorMessage = "Erro ao excluir item.";
+      
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error && errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Você não tem permissão para esta ação ou as regras do sistema bloquearam a exclusão.";
+          } else if (errorInfo.error) {
+            errorMessage = `Erro detalhado: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
+        }
+      }
+      alert(errorMessage);
     } finally {
       setIsDeleting(false);
     }
@@ -166,14 +180,28 @@ export default function ProfileScreen() {
 
       await updateDoc(doc(db, 'businesses', businessId), {
         rating: newRating
-      });
+      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${businessId}`); });
 
       setReviews(prev => prev.map(r => r.userId === userId && r.businessId === businessId ? editingReview : r));
       setEditingReview(null);
       alert("Avaliação atualizada com sucesso!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating review:", error instanceof Error ? error.message : String(error));
-      alert("Erro ao atualizar avaliação.");
+      let errorMessage = "Erro ao atualizar avaliação.";
+      
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error && errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Suas alterações foram bloqueadas. Isso pode ocorrer caso a empresa tenha dados inválidos.";
+          } else if (errorInfo.error) {
+            errorMessage = `Erro detalhado: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
+        }
+      }
+      alert(errorMessage);
     } finally {
       setSavingReview(false);
     }

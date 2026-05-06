@@ -224,7 +224,7 @@ export default function App() {
         setSettings(settingsSnap.data() as AppSettings);
       }
     } catch (e) {
-      console.error("Error fetching settings:", e);
+      console.error("Error fetching settings:", e instanceof Error ? e.message : String(e));
     }
   };
 

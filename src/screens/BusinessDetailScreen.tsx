@@ -147,15 +147,29 @@ export default function BusinessDetailScreen() {
       await updateDoc(doc(db, 'businesses', id), {
         rating: newRating,
         reviewCount: newCount
-      });
+      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
 
       setUserRating(0);
       setComment('');
       setEditingPersonalReview(false);
       alert("Avaliação excluída com sucesso!");
-    } catch (e) {
-      console.error("Error deleting review:", e instanceof Error ? e.message : String(e));
-      alert("Erro ao excluir avaliação.");
+    } catch (error: any) {
+      console.error("Error deleting review:", error instanceof Error ? error.message : String(error));
+      let errorMessage = "Erro ao excluir avaliação.";
+      
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error && errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Você não tem permissão para esta ação ou as regras do sistema bloquearam a exclusão (talvez o negócio original estivesse com dados inválidos).";
+          } else if (errorInfo.error) {
+            errorMessage = `Erro detalhado: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
+        }
+      }
+      alert(errorMessage);
     } finally {
       setSubmittingReview(false);
     }
@@ -195,7 +209,7 @@ export default function BusinessDetailScreen() {
       await updateDoc(doc(db, 'businesses', id), {
         rating: newRating,
         reviewCount: newCount
-      });
+      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
 
       if (!personalReview) {
         setUserRating(0);
@@ -203,9 +217,23 @@ export default function BusinessDetailScreen() {
       }
       setEditingPersonalReview(false);
       alert(personalReview ? "Avaliação atualizada!" : "Avaliação enviada com sucesso!");
-    } catch (e) {
-      console.error("Error submitting review:", e instanceof Error ? e.message : String(e));
-      alert("Erro ao enviar avaliação.");
+    } catch (error: any) {
+      console.error("Error submitting review:", error instanceof Error ? error.message : String(error));
+      let errorMessage = "Erro ao enviar avaliação.";
+      
+      if (error.message) {
+        try {
+          const errorInfo = JSON.parse(error.message);
+          if (errorInfo.error && errorInfo.error.includes('Missing or insufficient permissions')) {
+            errorMessage = "Erro de Permissão: Você não tem permissão ou as regras de negócio bloquearam (talvez o negócio tenha dados inválidos ou faltando informações legadas).";
+          } else if (errorInfo.error) {
+            errorMessage = `Erro detalhado: ${errorInfo.error}`;
+          }
+        } catch (e) {
+          errorMessage = `Erro: ${error.message}`;
+        }
+      }
+      alert(errorMessage);
     } finally {
       setSubmittingReview(false);
     }

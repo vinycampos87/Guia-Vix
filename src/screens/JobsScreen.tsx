@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { db } from '../firebase';
+import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, getDocs, addDoc, serverTimestamp, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '../App';
 import { Link, useNavigate } from 'react-router-dom';
@@ -52,12 +52,20 @@ export default function JobsScreen() {
         ownerId: user.uid,
         createdAt: serverTimestamp(),
       };
+      
+      // Strip any undefined values
+      Object.keys(jobToSave).forEach(key => {
+        if ((jobToSave as any)[key] === undefined) {
+          delete (jobToSave as any)[key];
+        }
+      });
+      
       const docRef = await addDoc(collection(db, 'jobs'), jobToSave).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'jobs'); });
       setJobs([{ id: docRef.id, ...newJob, ownerId: user.uid, createdAt: new Date() } as Job, ...jobs]);
       setShowAdd(false);
       setNewJob({ title: '', companyName: '', city: ES_CITIES[0], neighborhood: '', description: '', salary: '', contact: '', whatsapp: '', email: '' });
     } catch (error: any) {
-      console.error("Error adding job:", error);
+      console.error("Error adding job:", error instanceof Error ? error.message : String(error));
       let errorMessage = "Erro ao publicar vaga. Tente novamente.";
       
       if (error.message) {
@@ -90,7 +98,7 @@ export default function JobsScreen() {
       await deleteDoc(doc(db, 'jobs', id));
       setJobs(prev => prev.filter(j => j.id !== id));
     } catch (error) {
-      console.error("Error deleting job:", error);
+      console.error("Error deleting job:", error instanceof Error ? error.message : String(error));
     }
   };
 

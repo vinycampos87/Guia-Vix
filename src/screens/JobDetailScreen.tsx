@@ -31,7 +31,7 @@ export default function JobDetailScreen() {
           navigate('/jobs');
         }
       } catch (error) {
-        console.error("Error fetching job:", error);
+        console.error("Error fetching job:", error instanceof Error ? error.message : String(error));
       } finally {
         setLoading(false);
       }

@@ -40,7 +40,7 @@ export default function ImageCropper({ image, aspect, onCropComplete, onCancel }
       const croppedImage = await getCroppedImg(image, croppedAreaPixels, rotation);
       onCropComplete(croppedImage);
     } catch (e) {
-      console.error(e);
+      console.error("Crop error:", e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
