@@ -22,7 +22,9 @@ import {
   Wrench,
   Pizza,
   Home as HomeIcon,
-  Heart
+  Heart,
+  CupSoda,
+  IceCream
 } from 'lucide-react';
 import { Business, BUSINESS_CATEGORIES } from '../types';
 import { isBoosted, calculateDistance, formatDistance, cn } from '../lib/utils';
@@ -39,6 +41,8 @@ const CATEGORY_ICONS: Record<string, any> = {
   "Beleza": Sparkles,
   "Automotivo": Car,
   "Imobiliária": Building2,
+  "Bebidas": CupSoda,
+  "Sorveteria & Açaí": IceCream,
   "Outros": MapPin
 };
 

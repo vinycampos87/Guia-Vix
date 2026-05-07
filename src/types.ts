@@ -106,6 +106,8 @@ export const BUSINESS_CATEGORIES = [
   "Beleza",
   "Automotivo",
   "Imobiliária",
+  "Bebidas",
+  "Sorveteria & Açaí",
   "Outros"
 ];
 

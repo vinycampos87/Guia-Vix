@@ -36,6 +36,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   "Beleza": "✨",
   "Automotivo": "🚗",
   "Imobiliária": "🏢",
+  "Bebidas": "🥤",
+  "Sorveteria & Açaí": "🍧",
   "Outros": "📍"
 };
 
