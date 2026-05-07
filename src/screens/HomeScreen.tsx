@@ -54,6 +54,38 @@ export default function HomeScreen() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const { favorites, toggleFavorite } = useFavorites();
 
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  const handleSwipeStart = (e: React.TouchEvent | React.MouseEvent) => {
+    if ('touches' in e) {
+      setTouchStart(e.targetTouches[0].clientX);
+    } else {
+      setTouchStart((e as React.MouseEvent).clientX);
+    }
+  };
+
+  const handleSwipeMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (touchStart === null) return;
+    
+    const currentPosition = 'touches' in e 
+      ? e.targetTouches[0].clientX 
+      : (e as React.MouseEvent).clientX;
+      
+    const diff = touchStart - currentPosition;
+
+    if (diff > 50) {
+      setCurrentBanner((prev) => (prev + 1) % banners.length);
+      setTouchStart(null);
+    } else if (diff < -50) {
+      setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
+      setTouchStart(null);
+    }
+  };
+
+  const handleSwipeEnd = () => {
+    setTouchStart(null);
+  };
+
   const normalize = (text: string) => 
     text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
@@ -134,7 +166,7 @@ export default function HomeScreen() {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [banners]);
+  }, [banners, currentBanner]);
 
   const filteredData = businesses.filter(b => {
     const normSearch = normalize(searchTerm);
@@ -183,7 +215,16 @@ export default function HomeScreen() {
 
       {/* Banner Carousel */}
       {!loading && banners.length > 0 && (
-        <div className="relative h-44 md:h-72 lg:h-96 rounded-[28px] overflow-hidden shadow-xl border border-white/20 bg-slate-100">
+        <div 
+          className="relative h-44 md:h-72 lg:h-96 rounded-[28px] overflow-hidden shadow-xl border border-white/20 bg-slate-100 touch-pan-y"
+          onTouchStart={handleSwipeStart}
+          onTouchMove={handleSwipeMove}
+          onTouchEnd={handleSwipeEnd}
+          onMouseDown={handleSwipeStart}
+          onMouseMove={handleSwipeMove}
+          onMouseUp={handleSwipeEnd}
+          onMouseLeave={handleSwipeEnd}
+        >
           {banners.map((banner, index) => (
             index === currentBanner && (
               <motion.div
@@ -194,12 +235,13 @@ export default function HomeScreen() {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
-                <Link to={`/business/${banner.id}`} className="block w-full h-full">
+                <Link to={`/business/${banner.id}`} className="block w-full h-full" draggable={false}>
                   <img
                     src={banner.bannerImage}
                     alt={banner.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover select-none"
                     referrerPolicy="no-referrer"
+                    draggable={false}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
                     <div className="flex items-center gap-2 mb-1">
@@ -269,7 +311,7 @@ export default function HomeScreen() {
               <Star size={16} className="fill-primary" /> Parceiros Premium
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-1">
             {featuredList.map((b) => (
               <motion.div
                 key={b.id}
@@ -331,13 +373,13 @@ export default function HomeScreen() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <div key={i} className="h-40 bg-white/50 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : regularBusinesses.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
             {regularBusinesses.map((b, index) => (
               <motion.div
                 key={b.id}

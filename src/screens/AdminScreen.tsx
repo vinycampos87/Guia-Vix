@@ -832,6 +832,17 @@ export default function AdminScreen() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-slate-800 text-sm truncate">{item.name}</h3>
                         {item.role === 'admin' && <ShieldCheck size={14} className="text-primary" />}
+                        {(item.whatsapp || item.phone) && (
+                          <a 
+                            href={`https://wa.me/${(item.whatsapp || item.phone).replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-green-500 text-white p-1 rounded-full hover:scale-110 transition-transform hidden sm:flex"
+                            title="Conversar no WhatsApp"
+                          >
+                            <MessageSquare size={10} fill="currentColor" />
+                          </a>
+                        )}
                       </div>
                       <p className="text-[10px] text-slate-400 font-medium truncate">{item.email}</p>
                       <div className="flex items-center gap-2 mt-1">
@@ -842,6 +853,16 @@ export default function AdminScreen() {
                           {item.status || 'Ativo'}
                         </span>
                         <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Desde {new Date(item.createdAt).toLocaleDateString()}</span>
+                        {(item.whatsapp || item.phone) && (
+                          <a 
+                            href={`https://wa.me/${(item.whatsapp || item.phone).replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex sm:hidden items-center gap-1 text-[8px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-full"
+                          >
+                            WhatsApp
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>

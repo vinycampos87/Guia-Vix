@@ -109,47 +109,62 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen w-full bg-slate-50 relative">
       <header className={cn(
-        "bg-white/80 backdrop-blur-md border-b border-white/10 px-6 py-4 items-center justify-between sticky top-0 z-[60] shadow-sm",
-        shouldHideHeader ? "hidden md:flex" : "flex"
+        "bg-white/80 backdrop-blur-md border-b border-white/10 px-6 py-4 sticky top-0 z-[60] shadow-sm",
+        shouldHideHeader ? "hidden md:block" : "block"
       )}>
-        <div className="flex items-center gap-8 max-w-7xl mx-auto w-full">
-          <Link to="/" className="flex items-center gap-2">
-            {settings?.logoUrl ? (
-              <img src={settings.logoUrl} alt="Logo" className="max-h-12 w-auto object-contain" referrerPolicy="no-referrer" />
-            ) : (
-              <h1 className="text-2xl font-black text-primary tracking-tighter">Guia VIX</h1>
-            )}
-          </Link>
+        <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-12">
+            <Link to="/" className="flex items-center gap-2">
+              {settings?.logoUrl ? (
+                <img src={settings.logoUrl} alt="Logo" className="max-h-12 w-auto object-contain" referrerPolicy="no-referrer" />
+              ) : (
+                <h1 className="text-2xl font-black text-primary tracking-tighter">Guia VIX</h1>
+              )}
+            </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
-                    isActive ? "bg-primary/10 text-primary" : "text-slate-400 hover:text-slate-700 hober:bg-slate-50"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="flex-1" />
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all relative group",
+                      isActive ? "text-primary" : "text-slate-400 hover:text-slate-700"
+                    )}
+                  >
+                    <span className="relative z-10">{item.label}</span>
+                    {isActive && (
+                      <motion.div 
+                        layoutId="nav-bg-active"
+                        className="absolute inset-0 bg-primary/5 rounded-xl z-0"
+                      />
+                    )}
+                    {!isActive && (
+                      <div className="absolute inset-0 bg-slate-100 rounded-xl z-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex bg-slate-100 px-4 py-1.5 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200/50 items-center gap-1.5">
+            <div className="hidden lg:flex bg-slate-100 px-4 py-1.5 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200/50 items-center gap-1.5">
               <MapPin size={12} className="text-primary" /> Vitória, ES
             </div>
             {user ? (
-              <Link to="/register-business" className="p-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl transition-all shadow-sm">
-                <PlusCircle size={24} />
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link to="/register-business" className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                  <PlusCircle size={16} />
+                  <span>Cadastrar Empresa</span>
+                </Link>
+                <Link to="/register-business" className="sm:hidden p-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl transition-all shadow-sm">
+                  <PlusCircle size={24} />
+                </Link>
+              </div>
             ) : (
               <Link to="/auth" className="px-5 py-2.5 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
                 Entrar
@@ -159,7 +174,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-7xl mx-auto md:px-6 pb-32">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 pb-20 md:pb-12">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
