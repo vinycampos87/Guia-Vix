@@ -81,10 +81,25 @@ export default function JobDetailScreen() {
       <SEO 
         title={`${job.title} | ${job.companyName} | Guia VIX`}
         description={job.description?.substring(0, 160)}
+        ogImage={job.bannerImage}
         keywords={`${job.title}, vaga de emprego, ${job.companyName}, ${job.city}, vitória, trabalho, emprego es`}
         type="article"
       />
       <BoostHighlight expiresAt={job.boostExpiresAt} />
+      
+      {/* Company/Job Image Banner */}
+      {job.bannerImage && (
+        <div className="relative h-48 md:h-64 overflow-hidden">
+          <img 
+            src={job.bannerImage} 
+            alt={job.title} 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white px-6 pt-6 pb-6 rounded-b-[32px] shadow-sm border-b border-slate-100 z-30 flex-shrink-0">
         <div className="flex justify-between items-center mb-4">

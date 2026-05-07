@@ -24,7 +24,10 @@ export default function SEO({
   const finalTitle = title || settings?.siteTitle || 'Guia VIX - Guia Comercial de Vitória';
   const finalDescription = description || settings?.metaDescription || 'Encontre as melhores empresas, vagas de emprego e classificados em Vitória e região.';
   const finalKeywords = keywords || settings?.keywords || 'vitoria, guia vix, empresas, empregos, classificados, espirito santo';
+  
+  // Prioritize specific image, then global SEO image, then site logo
   const finalOgImage = ogImage || settings?.ogImage || settings?.logoUrl || '';
+  
   const finalCanonical = canonical || window.location.href;
   const showIndexing = settings?.indexingEnabled !== false;
 
@@ -32,29 +35,29 @@ export default function SEO({
     <Helmet>
       {/* Basic Meta Tags */}
       <title>{finalTitle}</title>
-      <meta name="description" content={finalDescription} />
-      <meta name="keywords" content={finalKeywords} />
+      <meta name="description" content={finalDescription} key="description" />
+      <meta name="keywords" content={finalKeywords} key="keywords" />
       
       {/* Robots */}
-      {!showIndexing && <meta name="robots" content="noindex, nofollow" />}
-      {showIndexing && <meta name="robots" content="index, follow" />}
+      {!showIndexing && <meta name="robots" content="noindex, nofollow" key="robots" />}
+      {showIndexing && <meta name="robots" content="index, follow" key="robots" />}
 
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:title" content={finalTitle} />
-      <meta property="og:description" content={finalDescription} />
-      <meta property="og:image" content={finalOgImage} />
-      <meta property="og:url" content={finalCanonical} />
-      <meta property="og:site_name" content="Guia VIX" />
+      <meta property="og:type" content={type} key="og:type" />
+      <meta property="og:title" content={finalTitle} key="og:title" />
+      <meta property="og:description" content={finalDescription} key="og:description" />
+      <meta property="og:image" content={finalOgImage} key="og:image" />
+      <meta property="og:url" content={finalCanonical} key="og:url" />
+      <meta property="og:site_name" content="Guia VIX" key="og:site_name" />
 
       {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={finalTitle} />
-      <meta name="twitter:description" content={finalDescription} />
-      <meta name="twitter:image" content={finalOgImage} />
+      <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
+      <meta name="twitter:title" content={finalTitle} key="twitter:title" />
+      <meta name="twitter:description" content={finalDescription} key="twitter:description" />
+      <meta name="twitter:image" content={finalOgImage} key="twitter:image" />
 
       {/* Canonical Link */}
-      <link rel="canonical" href={finalCanonical} />
+      <link rel="canonical" href={finalCanonical} key="canonical" />
 
       {/* Google Analytics */}
       {settings?.googleAnalyticsId && (

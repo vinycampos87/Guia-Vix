@@ -30,6 +30,7 @@ export default function JobsScreen() {
     contact: '',
     whatsapp: '',
     email: '',
+    bannerImage: '',
   });
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function JobsScreen() {
       const docRef = await addDoc(collection(db, 'jobs'), jobToSave).catch(e => { throw handleFirestoreError(e, OperationType.CREATE, 'jobs'); });
       setJobs([{ id: docRef.id, ...newJob, ownerId: user.uid, createdAt: new Date() } as Job, ...jobs]);
       setShowAdd(false);
-      setNewJob({ title: '', companyName: '', city: ES_CITIES[0], neighborhood: '', description: '', salary: '', contact: '', whatsapp: '', email: '' });
+      setNewJob({ title: '', companyName: '', city: ES_CITIES[0], neighborhood: '', description: '', salary: '', contact: '', whatsapp: '', email: '', bannerImage: '' });
     } catch (error: any) {
       console.error("Error adding job:", error instanceof Error ? error.message : String(error));
       let errorMessage = "Erro ao publicar vaga. Tente novamente.";
@@ -486,6 +487,46 @@ export default function JobsScreen() {
                         className="w-full mt-1 px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary font-bold text-slate-800"
                         required
                       />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 leading-relaxed">Imagem em Destaque (Vaga/Logo)</label>
+                    <div className="mt-1 flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50 gap-3">
+                      {newJob.bannerImage ? (
+                        <div className="relative group w-full">
+                          <img src={newJob.bannerImage} alt="Banner Preview" className="w-full h-32 object-cover rounded-2xl shadow-sm" referrerPolicy="no-referrer" />
+                          <button 
+                            type="button"
+                            onClick={() => setNewJob(prev => ({...prev, bannerImage: ''}))}
+                            className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-slate-300">
+                          <Store size={32} />
+                          <p className="text-[8px] font-black uppercase tracking-widest">Clique abaixo para enviar</p>
+                        </div>
+                      )}
+                      
+                      <label className="bg-white px-4 py-2 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+                        Selecionar Imagem
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => setNewJob(prev => ({...prev, bannerImage: reader.result as string}));
+                              reader.readAsDataURL(file);
+                            }
+                          }} 
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>

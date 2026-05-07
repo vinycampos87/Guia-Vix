@@ -89,6 +89,7 @@ export interface Job {
   contact: string;
   whatsapp?: string;
   email?: string;
+  bannerImage?: string;
   boostExpiresAt?: any;
   ownerId: string;
   createdAt: any;
