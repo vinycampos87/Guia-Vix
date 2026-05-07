@@ -16,6 +16,13 @@ export interface AppSettings {
   faviconUrl?: string;
   adminWhatsApp?: string;
   welcomeMessage?: string;
+  // SEO Fields
+  siteTitle?: string;
+  metaDescription?: string;
+  keywords?: string;
+  ogImage?: string;
+  googleAnalyticsId?: string;
+  indexingEnabled?: boolean;
 }
 
 export interface Business {

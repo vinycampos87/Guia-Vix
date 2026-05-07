@@ -39,7 +39,13 @@ export default function AdminScreen() {
   const [tempSettings, setTempSettings] = useState<AppSettings>({
     logoUrl: '',
     adminWhatsApp: '',
-    welcomeMessage: ''
+    welcomeMessage: '',
+    siteTitle: '',
+    metaDescription: '',
+    keywords: '',
+    ogImage: '',
+    googleAnalyticsId: '',
+    indexingEnabled: true
   });
 
   const fetchData = async () => {
@@ -465,6 +471,120 @@ export default function AdminScreen() {
                     <label className="bg-white px-6 py-2.5 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
                       <Upload size={14} /> Enviar Favicon
                       <input type="file" accept="image/*" className="hidden" onChange={handleFaviconUpload} />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 space-y-4">
+              <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest flex items-center gap-2">
+                <Search size={16} className="text-primary" /> Configurações de SEO
+              </h3>
+              <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest leading-relaxed">
+                Configure como o site aparece no Google e nas redes sociais para atrair mais visitantes.
+              </p>
+              
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Título do Site (Meta Title)</label>
+                  <input 
+                    type="text"
+                    value={tempSettings.siteTitle || ''}
+                    onChange={e => setTempSettings({...tempSettings, siteTitle: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm"
+                    placeholder="Ex: Guia VIX - O melhor guia comercial de Vitória"
+                  />
+                  <p className="text-[8px] text-slate-400 ml-1">Ideal: entre 50-60 caracteres.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Descrição do Site (Meta Description)</label>
+                  <textarea 
+                    value={tempSettings.metaDescription || ''}
+                    onChange={e => setTempSettings({...tempSettings, metaDescription: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm min-h-[100px]"
+                    placeholder="Descreva o que seu site oferece para os resultados de busca..."
+                  />
+                  <p className="text-[8px] text-slate-400 ml-1">Ideal: entre 140-160 caracteres.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Palavras-Chave (Keywords)</label>
+                  <input 
+                    type="text"
+                    value={tempSettings.keywords || ''}
+                    onChange={e => setTempSettings({...tempSettings, keywords: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm"
+                    placeholder="vitória, guia comercial, empresas vix, vagas de emprego"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">ID Google Analytics</label>
+                  <input 
+                    type="text"
+                    value={tempSettings.googleAnalyticsId || ''}
+                    onChange={e => setTempSettings({...tempSettings, googleAnalyticsId: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm"
+                    placeholder="G-XXXXXXXXXX"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Permitir Indexação</p>
+                    <p className="text-[8px] text-slate-400 uppercase tracking-widest mt-1">Aparecer nos resultados do Google (Robots)</p>
+                  </div>
+                  <button 
+                    onClick={() => setTempSettings(prev => ({...prev, indexingEnabled: !prev.indexingEnabled}))}
+                    className={`w-12 h-6 rounded-full transition-all relative ${tempSettings.indexingEnabled ? 'bg-primary' : 'bg-slate-300'}`}
+                  >
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${tempSettings.indexingEnabled ? 'left-7' : 'left-1'}`} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 space-y-4">
+              <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest flex items-center gap-2">
+                <ImageIcon size={16} className="text-primary" /> Imagem Compartilhamento (OG Image)
+              </h3>
+              <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50 gap-4">
+                  {tempSettings.ogImage ? (
+                    <div className="relative group w-full">
+                      <img src={tempSettings.ogImage} alt="OG Preview" className="w-full h-40 object-cover rounded-2xl" referrerPolicy="no-referrer" />
+                      <button 
+                        onClick={() => setTempSettings(prev => ({...prev, ogImage: ''}))}
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-full h-40 bg-slate-100 rounded-[32px] flex flex-col items-center justify-center text-slate-300 gap-2 border border-slate-200">
+                      <ImageIcon size={48} />
+                      <p className="text-[8px] font-black uppercase tracking-widest">1200 x 630 recomendado</p>
+                    </div>
+                  )}
+                  
+                  <div className="text-center">
+                    <label className="bg-white px-6 py-2.5 rounded-xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+                      <Upload size={14} /> Enviar Imagem OG
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => setTempSettings(prev => ({...prev, ogImage: reader.result as string}));
+                            reader.readAsDataURL(file);
+                          }
+                        }} 
+                      />
                     </label>
                   </div>
                 </div>

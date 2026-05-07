@@ -8,6 +8,7 @@ import { Job } from '../types';
 import { useAuth } from '../App';
 import { shareItem } from '../lib/share';
 import BoostHighlight from '../components/BoostHighlight';
+import SEO from '../components/SEO';
 
 export default function JobDetailScreen() {
   const { id } = useParams<{ id: string }>();
@@ -77,6 +78,12 @@ export default function JobDetailScreen() {
 
   return (
     <div className="relative">
+      <SEO 
+        title={`${job.title} | ${job.companyName} | Guia VIX`}
+        description={job.description?.substring(0, 160)}
+        keywords={`${job.title}, vaga de emprego, ${job.companyName}, ${job.city}, vitória, trabalho, emprego es`}
+        type="article"
+      />
       <BoostHighlight expiresAt={job.boostExpiresAt} />
       {/* Header */}
       <div className="bg-white px-6 pt-6 pb-6 rounded-b-[32px] shadow-sm border-b border-slate-100 z-30 flex-shrink-0">

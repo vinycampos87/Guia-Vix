@@ -41,6 +41,7 @@ export default function RegisterBusinessScreen() {
     neighborhood: '',
     city: '',
     mapsUrl: '',
+    website: '',
     openingHours: '',
     bannerImage: '',
     images: [] as string[],
@@ -84,6 +85,7 @@ export default function RegisterBusinessScreen() {
               phone: data.phone,
               whatsapp: data.whatsapp,
               email: data.email || '',
+              website: data.website || '',
               address: data.address,
               neighborhood: data.neighborhood || '',
               city: data.city || '',
@@ -579,6 +581,17 @@ export default function RegisterBusinessScreen() {
                 onChange={(e) => setFormData({ ...formData, mapsUrl: e.target.value })}
                 className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary text-slate-600 font-medium"
                 placeholder="https://goo.gl/maps/..."
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Website (Opcional)</label>
+              <input
+                type="url"
+                value={formData.website}
+                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
+                placeholder="https://suaempresa.com.br"
               />
             </div>
 

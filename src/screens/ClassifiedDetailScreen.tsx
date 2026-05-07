@@ -9,6 +9,7 @@ import { Classified } from '../types';
 import { cn } from '../lib/utils';
 import { shareItem } from '../lib/share';
 import BoostHighlight from '../components/BoostHighlight';
+import SEO from '../components/SEO';
 
 export default function ClassifiedDetailScreen() {
   const { id } = useParams();
@@ -78,6 +79,13 @@ export default function ClassifiedDetailScreen() {
 
   return (
     <div className="relative pb-32">
+      <SEO 
+        title={`${ad.title} | R$ ${ad.price || 'A combinar'} | Guia VIX`}
+        description={ad.description?.substring(0, 160)}
+        ogImage={ad.images?.[0]}
+        keywords={`${ad.title}, classificados vitória, comprar e vender vix, ${ad.neighborhood}, guiavix`}
+        type="product"
+      />
       <BoostHighlight expiresAt={ad.boostExpiresAt} />
       {/* Fixed Header area (Buttons only) */}
       <div className={cn(

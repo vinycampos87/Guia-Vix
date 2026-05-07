@@ -37,6 +37,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { usePushNotifications } from './hooks/usePushNotifications';
 
 import { UserProfile, AppSettings } from './types';
+import SEO from './components/SEO';
 
 // Context
 interface AuthContextType {
@@ -108,6 +109,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-slate-50 relative">
+      <SEO />
       <header className={cn(
         "bg-white/80 backdrop-blur-md border-b border-white/10 px-6 py-4 sticky top-0 z-[60] shadow-sm",
         shouldHideHeader ? "hidden md:block" : "block"
