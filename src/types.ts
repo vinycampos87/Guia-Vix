@@ -56,6 +56,7 @@ export interface Business {
   latitude?: number;
   longitude?: number;
   website?: string;
+  ifoodUrl?: string;
 }
 
 export interface Review {

@@ -313,7 +313,19 @@ export default function BusinessDetailScreen() {
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight leading-none drop-shadow-md">{business.name}</h1>
+          <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight leading-none drop-shadow-md mb-2">{business.name}</h1>
+          <div className="flex items-center gap-2 drop-shadow-md">
+            <span className="text-white font-black text-sm">{Number(avgRating) > 0 ? avgRating : 'Novo'}</span>
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star 
+                  key={s} 
+                  size={14} 
+                  className={s <= Number(avgRating) ? "text-amber-400 fill-amber-400" : "text-slate-300 fill-slate-300"} 
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -324,74 +336,72 @@ export default function BusinessDetailScreen() {
         <div className="md:col-span-8 flex flex-col gap-8">
           
           {/* Quick Info Card */}
-          <div className="bg-white rounded-[32px] p-6 shadow-xl shadow-slate-200 border border-slate-100 flex flex-wrap items-center justify-center gap-y-4 md:gap-x-8">
-            <div className="flex flex-col items-center gap-1 min-w-[70px]">
-              <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-400 shadow-inner">
-                <Star size={24} fill="currentColor" />
-              </div>
-              <span className="text-sm font-black text-slate-800">{Number(avgRating) > 0 ? avgRating : 'Novo'}</span>
-            </div>
-
-            <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
-
-            <div className="flex flex-col items-center gap-1 min-w-[70px]">
+          <div className="bg-white rounded-[32px] p-6 shadow-xl shadow-slate-200 border border-slate-100 flex flex-wrap items-center justify-center gap-x-6 gap-y-6 md:gap-x-8">
+            <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
               <div className={`w-12 h-12 ${isOpen === true ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'} rounded-2xl flex items-center justify-center shadow-inner`}>
                 <Clock size={24} />
               </div>
-              <span className={`text-sm font-black ${isOpen === true ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span className={`text-xs font-black uppercase tracking-widest ${isOpen === true ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {isOpen === true ? 'Aberto' : isOpen === false ? 'Fechado' : 'Checar'}
               </span>
             </div>
 
             {business.phone && (
-              <>
-                <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
-                <div className="flex flex-col items-center gap-1 min-w-[70px]">
-                  <a 
-                    href={`tel:${business.phone}`}
-                    className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 shadow-inner hover:text-primary transition-colors"
-                  >
-                    <Phone size={24} />
-                  </a>
-                  <span className="text-sm font-black text-slate-800">Ligar</span>
-                </div>
-              </>
+              <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
+                <a 
+                  href={`tel:${business.phone}`}
+                  className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 shadow-inner hover:text-primary transition-colors"
+                >
+                  <Phone size={24} />
+                </a>
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Ligar</span>
+              </div>
             )}
 
             {business.whatsapp && (
-              <>
-                <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
-                <div className="flex flex-col items-center gap-1 group min-w-[70px]">
-                  <a 
-                    href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 bg-[#25D366] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#25D366]/20 hover:scale-110 transition-all transform duration-300"
-                    title="WhatsApp"
-                  >
-                    {/* WhatsApp Original Logo SVG */}
-                    <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                    </svg>
-                  </a>
-                  <span className="text-sm font-black text-[#25D366]">WhatsApp</span>
-                </div>
-              </>
+              <div className="flex flex-col items-center gap-1.5 group min-w-[64px]">
+                <a 
+                  href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 bg-[#25D366] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#25D366]/20 hover:scale-110 transition-all transform duration-300"
+                  title="WhatsApp"
+                >
+                  {/* WhatsApp Original Logo SVG */}
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                </a>
+                <span className="text-xs font-black uppercase tracking-widest text-[#25D366]">WhatsApp</span>
+              </div>
             )}
 
             {business.email && (
-              <>
-                <div className="hidden md:block w-[1px] h-12 bg-slate-100" />
-                <div className="flex flex-col items-center gap-1 min-w-[70px]">
-                  <a 
-                    href={`mailto:${business.email}`}
-                    className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 hover:scale-105 transition-all"
-                  >
-                    <Mail size={24} />
-                  </a>
-                  <span className="text-sm font-black text-blue-500 text-center truncate w-full px-1">E-mail</span>
-                </div>
-              </>
+              <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
+                <a 
+                  href={`mailto:${business.email}`}
+                  className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shadow-inner hover:scale-105 transition-all text-center"
+                >
+                  <Mail size={24} />
+                </a>
+                <span className="text-xs font-black uppercase tracking-widest text-blue-500">E-mail</span>
+              </div>
+            )}
+
+            {business.ifoodUrl && (
+              <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
+                <a 
+                  href={business.ifoodUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 bg-[#ea1d2c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#ea1d2c]/20 hover:scale-110 transition-all text-white"
+                >
+                  <svg viewBox="0 0 500 500" className="w-7 h-7 fill-white">
+                    <path d="M127.38,367.42c-34.9,0-63.19-28.29-63.19-63.19s28.29-63.19,63.19-63.19,63.19,28.29,63.19,63.19S162.28,367.42,127.38,367.42Zm101.44-126.38a126.37,126.37,0,1,0,60.52,106.84V64.19H127.38v21.57A126.39,126.39,0,0,0,228.82,241.04Z" />
+                  </svg>
+                </a>
+                <span className="text-xs font-black uppercase tracking-widest text-[#ea1d2c]">iFood</span>
+              </div>
             )}
           </div>
 
@@ -499,7 +509,7 @@ export default function BusinessDetailScreen() {
             )}
 
             {/* Mobile Contact Actions */}
-            {(business.phone || business.whatsapp || business.website) && (
+            {(business.phone || business.whatsapp || business.website || business.ifoodUrl) && (
               <div className={cn(
                 "md:hidden grid gap-3 py-4",
                 (business.phone && business.whatsapp) || (business.phone && business.website) || (business.whatsapp && business.website) ? "grid-cols-2" : "grid-cols-1"
@@ -522,6 +532,18 @@ export default function BusinessDetailScreen() {
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.446 4.432-9.877 9.888-9.877 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.446-4.435 9.877-9.885 9.877m8.415-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                     </svg> WhatsApp
+                  </a>
+                )}
+                {business.ifoodUrl && (
+                  <a 
+                    href={business.ifoodUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="col-span-full bg-[#ea1d2c] text-white py-4 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#ea1d2c]/20 active:scale-95 transition-all text-xs"
+                  >
+                    <svg viewBox="0 0 500 500" className="w-5 h-5 fill-white">
+                      <path d="M127.38,367.42c-34.9,0-63.19-28.29-63.19-63.19s28.29-63.19,63.19-63.19,63.19,28.29,63.19,63.19S162.28,367.42,127.38,367.42Zm101.44-126.38a126.37,126.37,0,1,0,60.52,106.84V64.19H127.38v21.57A126.39,126.39,0,0,0,228.82,241.04Z" />
+                    </svg> Pedir no iFood
                   </a>
                 )}
                 {business.website && (
@@ -690,6 +712,18 @@ export default function BusinessDetailScreen() {
                   className="w-full bg-slate-900 text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   <Phone size={20} /> Ligar
+                </a>
+              )}
+              {business.ifoodUrl && (
+                <a 
+                  href={business.ifoodUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#ea1d2c] text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg shadow-[#ea1d2c]/20 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  <svg viewBox="0 0 500 500" className="w-5 h-5 fill-white">
+                    <path d="M127.38,367.42c-34.9,0-63.19-28.29-63.19-63.19s28.29-63.19,63.19-63.19,63.19,28.29,63.19,63.19S162.28,367.42,127.38,367.42Zm101.44-126.38a126.37,126.37,0,1,0,60.52,106.84V64.19H127.38v21.57A126.39,126.39,0,0,0,228.82,241.04Z" />
+                  </svg> Pedir no iFood
                 </a>
               )}
               {business.website && (

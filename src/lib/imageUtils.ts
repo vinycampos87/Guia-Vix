@@ -32,8 +32,8 @@ export async function compressImage(file: File, maxWidth = 1200, maxHeight = 120
         ctx.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL(format, quality));
       };
-      img.onerror = (e) => reject(e);
+      img.onerror = () => reject(new Error('Failed to load image for compression'));
     };
-    reader.onerror = (e) => reject(e);
+    reader.onerror = () => reject(new Error('Failed to read file for compression'));
   });
 }

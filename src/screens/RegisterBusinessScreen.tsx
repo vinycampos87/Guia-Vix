@@ -42,6 +42,7 @@ export default function RegisterBusinessScreen() {
     city: '',
     mapsUrl: '',
     website: '',
+    ifoodUrl: '',
     openingHours: '',
     bannerImage: '',
     images: [] as string[],
@@ -86,6 +87,7 @@ export default function RegisterBusinessScreen() {
               whatsapp: data.whatsapp,
               email: data.email || '',
               website: data.website || '',
+              ifoodUrl: data.ifoodUrl || '',
               address: data.address,
               neighborhood: data.neighborhood || '',
               city: data.city || '',
@@ -592,6 +594,17 @@ export default function RegisterBusinessScreen() {
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
                 placeholder="https://suaempresa.com.br"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link iFood (Opcional)</label>
+              <input
+                type="url"
+                value={formData.ifoodUrl}
+                onChange={(e) => setFormData({ ...formData, ifoodUrl: e.target.value })}
+                className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
+                placeholder="https://www.ifood.com.br/delivery/..."
               />
             </div>
 
