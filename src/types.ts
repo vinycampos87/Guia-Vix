@@ -23,6 +23,13 @@ export interface AppSettings {
   ogImage?: string;
   googleAnalyticsId?: string;
   indexingEnabled?: boolean;
+  homeBanners?: HomeBanner[];
+}
+
+export interface HomeBanner {
+  id: string;
+  imageUrl: string;
+  linkUrl: string;
 }
 
 export interface Business {

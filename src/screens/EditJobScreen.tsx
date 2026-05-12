@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ChevronLeft, Save, X, Briefcase, Store, Landmark } from 'lucide-react';
 import { Job, ES_CITIES } from '../types';
+import { compressImage } from '../lib/imageUtils';
 
 export default function EditJobScreen() {
   const { user, isAdmin } = useAuth();
@@ -257,9 +258,9 @@ export default function EditJobScreen() {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onload = () => setFormData(prev => ({...prev, bannerImage: reader.result as string}));
-                      reader.readAsDataURL(file);
+                      compressImage(file, 1200, 800, 'image/webp', 0.8)
+                        .then(compressed => setFormData(prev => ({...prev, bannerImage: compressed})))
+                        .catch(err => console.error("Error compressing image", err));
                     }
                   }} 
                 />

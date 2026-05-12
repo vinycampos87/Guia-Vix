@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { LogOut, User, Settings, Plus, Edit2, Trash2, Store, ShoppingBag, Briefcase, Database, Shield, Star, X, Save, Camera, Phone, FileText, Upload, MessageSquare, ChevronRight, Heart } from 'lucide-react';
 import { Business, Classified, Job, Review } from '../types';
+import { compressImage } from '../lib/imageUtils';
 import { useFavorites } from '../hooks/useFavorites';
 
 export default function ProfileScreen() {
@@ -40,15 +41,9 @@ export default function ProfileScreen() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 800000) { // ~800KB limit for Firestore doc size safety
-        alert("A imagem é muito grande. Escolha uma imagem de até 800KB.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditForm(prev => ({ ...prev, photoURL: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, 400, 400, 'image/webp', 0.8)
+        .then(compressed => setEditForm(prev => ({ ...prev, photoURL: compressed })))
+        .catch(err => console.error("Error compressing user photo", err));
     }
   };
 

@@ -8,10 +8,11 @@ import {
   Shield, Store, Star, ChevronLeft, Search, CheckCircle2, XCircle, 
   Briefcase, ShoppingBag, Trash2, Users, Settings, UserMinus, 
   UserCheck, ShieldCheck, Mail, Phone, ExternalLink, Image as ImageIcon, Save,
-  Edit2, Upload, X, MessageSquare, Database, RefreshCcw, AlertTriangle
+  Edit2, Upload, X, MessageSquare, Database, RefreshCcw, AlertTriangle, Plus, ArrowUp, ArrowDown, Layout
 } from 'lucide-react';
 import { Business, Classified, Job, UserProfile, AppSettings, Review } from '../types';
 import { seedBusinesses } from '../scripts/seedData';
+import { compressImage } from '../lib/imageUtils';
 
 type AdminTab = 'businesses' | 'jobs' | 'classifieds' | 'users' | 'settings' | 'reviews';
 
@@ -45,7 +46,8 @@ export default function AdminScreen() {
     keywords: '',
     ogImage: '',
     googleAnalyticsId: '',
-    indexingEnabled: true
+    indexingEnabled: true,
+    homeBanners: []
   });
 
   const fetchData = async () => {
@@ -207,26 +209,28 @@ export default function AdminScreen() {
     }
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setTempSettings(prev => ({ ...prev, logoUrl: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedImage = await compressImage(file, 800, 800, 'image/webp', 0.8);
+      setTempSettings(prev => ({ ...prev, logoUrl: compressedImage }));
+    } catch (error) {
+      console.error("Error compressing logo:", error);
+    }
   };
 
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setTempSettings(prev => ({ ...prev, faviconUrl: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedImage = await compressImage(file, 256, 256, 'image/png', 0.9);
+      setTempSettings(prev => ({ ...prev, faviconUrl: compressedImage }));
+    } catch (error) {
+      console.error("Error compressing favicon:", error);
+    }
   };
 
   const saveSettings = async () => {
@@ -579,15 +583,146 @@ export default function AdminScreen() {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onload = () => setTempSettings(prev => ({...prev, ogImage: reader.result as string}));
-                            reader.readAsDataURL(file);
+                            compressImage(file, 1200, 630, 'image/webp', 0.8)
+                              .then(compressedImage => {
+                                setTempSettings(prev => ({...prev, ogImage: compressedImage}));
+                              })
+                              .catch(err => console.error('Error compressing OG image:', err));
                           }
                         }} 
                       />
                     </label>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest flex items-center gap-2">
+                  <Layout size={16} className="text-primary" /> Banners da Home
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setTempSettings(prev => ({
+                    ...prev,
+                    homeBanners: [...(prev.homeBanners || []), { id: Date.now().toString(), imageUrl: '', linkUrl: '' }]
+                  }))}
+                  className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 hover:bg-primary/20 transition-colors"
+                >
+                  <Plus size={14} /> Adicionar Banner
+                </button>
+              </div>
+              <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest leading-relaxed">
+                Adicione banners para o carrossel do topo da página inicial. Recomenda-se imagens no formato horizontal (ex: 1200x600).
+              </p>
+              
+              <div className="space-y-4 pt-2">
+                {(tempSettings.homeBanners || []).map((banner, idx) => (
+                  <div key={banner.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 relative group">
+                    <button
+                      type="button"
+                      onClick={() => setTempSettings(prev => ({
+                        ...prev,
+                        homeBanners: prev.homeBanners?.filter(b => b.id !== banner.id)
+                      }))}
+                      className="absolute -top-3 -right-3 bg-rose-500 text-white p-1.5 rounded-full shadow-lg opacity-0 md:group-hover:opacity-100 transition-opacity z-10"
+                    >
+                      <X size={14} />
+                    </button>
+                    
+                    <div className="flex gap-2 mb-2 absolute -top-3 right-8 z-10 opacity-0 md:group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (idx === 0) return;
+                          setTempSettings(prev => {
+                            const newBanners = [...(prev.homeBanners || [])];
+                            const temp = newBanners[idx];
+                            newBanners[idx] = newBanners[idx - 1];
+                            newBanners[idx - 1] = temp;
+                            return { ...prev, homeBanners: newBanners };
+                          });
+                        }}
+                        className={`p-1.5 rounded-full bg-white shadow-lg border border-slate-200 text-slate-600 ${idx === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'}`}
+                        disabled={idx === 0}
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const banners = tempSettings.homeBanners || [];
+                          if (idx === banners.length - 1) return;
+                          setTempSettings(prev => {
+                            const newBanners = [...(prev.homeBanners || [])];
+                            const temp = newBanners[idx];
+                            newBanners[idx] = newBanners[idx + 1];
+                            newBanners[idx + 1] = temp;
+                            return { ...prev, homeBanners: newBanners };
+                          });
+                        }}
+                        className={`p-1.5 rounded-full bg-white shadow-lg border border-slate-200 text-slate-600 ${idx === (tempSettings.homeBanners?.length || 0) - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'}`}
+                        disabled={idx === (tempSettings.homeBanners?.length || 0) - 1}
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <div className="flex gap-4 items-start">
+                        <div className="w-32 h-20 bg-slate-200 rounded-xl border border-slate-300 flex-shrink-0 flex items-center justify-center overflow-hidden relative">
+                          {banner.imageUrl ? (
+                            <img src={banner.imageUrl} alt="Banner" className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon size={24} className="text-slate-400" />
+                          )}
+                          <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white opacity-0 hover:opacity-100 cursor-pointer transition-opacity">
+                            <Upload size={16} />
+                            <span className="text-[8px] font-bold uppercase mt-1">Enviar</span>
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              className="hidden" 
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  compressImage(file, 1200, 800, 'image/webp', 0.8)
+                                    .then(compressedImage => {
+                                      setTempSettings(prev => ({
+                                        ...prev,
+                                        homeBanners: prev.homeBanners?.map(b => b.id === banner.id ? { ...b, imageUrl: compressedImage } : b)
+                                      }));
+                                    })
+                                    .catch(err => console.error('Error compressing banner:', err));
+                                }
+                              }} 
+                            />
+                          </label>
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link de Destino</label>
+                          <input 
+                            type="text"
+                            value={banner.linkUrl}
+                            onChange={e => setTempSettings(prev => ({
+                              ...prev,
+                              homeBanners: prev.homeBanners?.map(b => b.id === banner.id ? { ...b, linkUrl: e.target.value } : b)
+                            }))}
+                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm"
+                            placeholder="ex: /business/ID ou https://..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {!(tempSettings.homeBanners?.length) && (
+                  <div className="p-8 text-center text-slate-400 border-2 border-dashed border-slate-100 rounded-2xl text-sm font-medium">
+                    Nenhum banner cadastrado.<br />Clique em "Adicionar Banner" para começar.
+                  </div>
+                )}
               </div>
             </div>
 

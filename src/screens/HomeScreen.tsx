@@ -30,6 +30,7 @@ import { Business, BUSINESS_CATEGORIES } from '../types';
 import { isBoosted, calculateDistance, formatDistance, cn } from '../lib/utils';
 import { useFavorites } from '../hooks/useFavorites';
 import LocationPermissionModal from '../components/LocationPermissionModal';
+import { useAuth } from '../App';
 
 const CATEGORY_ICONS: Record<string, any> = {
   "Restaurante": Utensils,
@@ -48,8 +49,9 @@ const CATEGORY_ICONS: Record<string, any> = {
 
 export default function HomeScreen() {
   const navigate = useNavigate();
+  const { settings } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [banners, setBanners] = useState<Business[]>([]);
+  const [fallbackBanners, setFallbackBanners] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -68,6 +70,8 @@ export default function HomeScreen() {
     }
   };
 
+  const activeBanners = settings?.homeBanners && settings.homeBanners.length > 0 ? settings.homeBanners : fallbackBanners;
+
   const handleSwipeMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (touchStart === null) return;
     
@@ -78,10 +82,10 @@ export default function HomeScreen() {
     const diff = touchStart - currentPosition;
 
     if (diff > 50) {
-      setCurrentBanner((prev) => (prev + 1) % banners.length);
+      setCurrentBanner((prev) => (prev + 1) % activeBanners.length);
       setTouchStart(null);
     } else if (diff < -50) {
-      setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length);
+      setCurrentBanner((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
       setTouchStart(null);
     }
   };
@@ -111,7 +115,7 @@ export default function HomeScreen() {
         
         // Ensure Premiums are the first 5 slides as requested
         const combinedBanners = [...selectedPremium, ...selectedRegular];
-        setBanners(combinedBanners);
+        setFallbackBanners(combinedBanners);
       } catch (error) {
         console.error("Error fetching businesses:", error instanceof Error ? error.message : String(error));
       } finally {
@@ -165,12 +169,38 @@ export default function HomeScreen() {
 
   // Auto-scroll banners
   useEffect(() => {
-    if (banners.length === 0) return;
+    if (activeBanners.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentBanner((prev) => (prev + 1) % banners.length);
+      setCurrentBanner((prev) => (prev + 1) % activeBanners.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [banners, currentBanner]);
+  }, [activeBanners.length, currentBanner]);
+
+  const unifiedBanners = activeBanners.map(b => {
+    if ('imageUrl' in b) {
+      // It's a HomeBanner
+      const hb = b as import('../types').HomeBanner;
+      return {
+        id: hb.id,
+        image: hb.imageUrl,
+        link: hb.linkUrl,
+        title: '',
+        subtitle: null
+      };
+    } else {
+      // It's a Business
+      const bus = b as import('../types').Business;
+      return {
+        id: bus.id,
+        image: bus.bannerImage,
+        link: `/business/${bus.id}`,
+        title: bus.name,
+        subtitle: isBoosted(bus) 
+          ? { text: 'Anunciante Premium', isFeatured: true } 
+          : { text: 'Recomendado', isFeatured: false }
+      };
+    }
+  });
 
   const filteredData = businesses.filter(b => {
     const normSearch = normalize(searchTerm);
@@ -218,9 +248,9 @@ export default function HomeScreen() {
       </div>
 
       {/* Banner Carousel */}
-      {!loading && banners.length > 0 && (
+      {!loading && unifiedBanners.length > 0 && (
         <div 
-          className="relative h-44 md:h-72 lg:h-96 rounded-[28px] overflow-hidden shadow-xl border border-white/20 bg-slate-100 touch-pan-y"
+          className="relative h-44 md:h-72 lg:h-96 rounded-[28px] overflow-hidden shadow-xl border border-white/20 bg-slate-100 touch-pan-y group"
           onTouchStart={handleSwipeStart}
           onTouchMove={handleSwipeMove}
           onTouchEnd={handleSwipeEnd}
@@ -229,7 +259,7 @@ export default function HomeScreen() {
           onMouseUp={handleSwipeEnd}
           onMouseLeave={handleSwipeEnd}
         >
-          {banners.map((banner, index) => (
+          {unifiedBanners.map((banner, index) => (
             index === currentBanner && (
               <motion.div
                 key={banner.id}
@@ -239,33 +269,62 @@ export default function HomeScreen() {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
-                <Link to={`/business/${banner.id}`} className="block w-full h-full" draggable={false}>
-                  <img
-                    src={banner.bannerImage}
-                    alt={banner.name}
-                    className="w-full h-full object-cover select-none"
-                    referrerPolicy="no-referrer"
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
-                    <div className="flex items-center gap-2 mb-1">
-                      {banner.isFeatured ? (
-                        <>
-                          <Star size={10} className="text-accent fill-accent" />
-                          <span className="text-accent text-[10px] font-black uppercase tracking-[2px]">Anunciante Premium</span>
-                        </>
-                      ) : (
-                        <span className="text-white/60 text-[10px] font-black uppercase tracking-[2px]">Recomendado</span>
-                      )}
-                    </div>
-                    <h3 className="text-white font-bold text-lg leading-tight">{banner.name}</h3>
-                  </div>
-                </Link>
+                {banner.link.startsWith('http') ? (
+                  <a href={banner.link} target="_blank" rel="noopener noreferrer" className="block w-full h-full" draggable={false}>
+                    <img
+                      src={banner.image}
+                      alt={banner.title || 'Banner'}
+                      className="w-full h-full object-cover select-none"
+                      referrerPolicy="no-referrer"
+                      draggable={false}
+                    />
+                    {banner.subtitle && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
+                        <div className="flex items-center gap-2 mb-1">
+                          {banner.subtitle.isFeatured ? (
+                            <>
+                              <Star size={10} className="text-accent fill-accent" />
+                              <span className="text-accent text-[10px] font-black uppercase tracking-[2px]">{banner.subtitle.text}</span>
+                            </>
+                          ) : (
+                            <span className="text-white/60 text-[10px] font-black uppercase tracking-[2px]">{banner.subtitle.text}</span>
+                          )}
+                        </div>
+                        <h3 className="text-white font-bold text-lg leading-tight">{banner.title}</h3>
+                      </div>
+                    )}
+                  </a>
+                ) : (
+                  <Link to={banner.link} className="block w-full h-full" draggable={false}>
+                    <img
+                      src={banner.image}
+                      alt={banner.title || 'Banner'}
+                      className="w-full h-full object-cover select-none"
+                      referrerPolicy="no-referrer"
+                      draggable={false}
+                    />
+                    {banner.subtitle && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
+                        <div className="flex items-center gap-2 mb-1">
+                          {banner.subtitle.isFeatured ? (
+                            <>
+                              <Star size={10} className="text-accent fill-accent" />
+                              <span className="text-accent text-[10px] font-black uppercase tracking-[2px]">{banner.subtitle.text}</span>
+                            </>
+                          ) : (
+                            <span className="text-white/60 text-[10px] font-black uppercase tracking-[2px]">{banner.subtitle.text}</span>
+                          )}
+                        </div>
+                        <h3 className="text-white font-bold text-lg leading-tight">{banner.title}</h3>
+                      </div>
+                    )}
+                  </Link>
+                )}
               </motion.div>
             )
           ))}
           <div className="absolute bottom-4 right-5 flex gap-1.5 z-10">
-            {banners.map((_, i) => (
+            {unifiedBanners.map((_, i) => (
               <div
                 key={i}
                 className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${currentBanner === i ? 'bg-white w-4' : 'bg-white/40'}`}

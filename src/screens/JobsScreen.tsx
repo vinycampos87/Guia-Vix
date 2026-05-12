@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { Briefcase, Plus, X, DollarSign, Phone, Mail, MapPin, Search, Landmark, Store, Edit2, Trash2, Star, ChevronRight } from 'lucide-react';
 import { Job, ES_CITIES } from '../types';
+import { compressImage } from '../lib/imageUtils';
 
 export default function JobsScreen() {
   const navigate = useNavigate();
@@ -520,9 +521,9 @@ export default function JobsScreen() {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const reader = new FileReader();
-                              reader.onload = () => setNewJob(prev => ({...prev, bannerImage: reader.result as string}));
-                              reader.readAsDataURL(file);
+                              compressImage(file, 1200, 800, 'image/webp', 0.8)
+                                .then(compressed => setNewJob(prev => ({...prev, bannerImage: compressed})))
+                                .catch(err => console.error("Error compressing image", err));
                             }
                           }} 
                         />
