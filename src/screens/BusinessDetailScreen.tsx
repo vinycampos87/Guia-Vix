@@ -394,11 +394,13 @@ export default function BusinessDetailScreen() {
                   href={business.ifoodUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-[#ea1d2c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#ea1d2c]/20 hover:scale-110 transition-all text-white"
+                  className="w-12 h-12 bg-[#ea1d2c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#ea1d2c]/20 hover:scale-110 transition-all text-white p-2"
                 >
-                  <svg viewBox="0 0 500 500" className="w-7 h-7 fill-white">
-                    <path d="M127.38,367.42c-34.9,0-63.19-28.29-63.19-63.19s28.29-63.19,63.19-63.19,63.19,28.29,63.19,63.19S162.28,367.42,127.38,367.42Zm101.44-126.38a126.37,126.37,0,1,0,60.52,106.84V64.19H127.38v21.57A126.39,126.39,0,0,0,228.82,241.04Z" />
-                  </svg>
+                  <img 
+                    src="https://cdn-1.webcatalog.io/catalog/ifood/ifood-icon-filled-256.webp?v=1714774711502" 
+                    alt="iFood" 
+                    className="w-full h-full object-contain" 
+                  />
                 </a>
                 <span className="text-xs font-black uppercase tracking-widest text-[#ea1d2c]">iFood</span>
               </div>
@@ -541,9 +543,11 @@ export default function BusinessDetailScreen() {
                     rel="noopener noreferrer"
                     className="col-span-full bg-[#ea1d2c] text-white py-4 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-[#ea1d2c]/20 active:scale-95 transition-all text-xs"
                   >
-                    <svg viewBox="0 0 500 500" className="w-5 h-5 fill-white">
-                      <path d="M127.38,367.42c-34.9,0-63.19-28.29-63.19-63.19s28.29-63.19,63.19-63.19,63.19,28.29,63.19,63.19S162.28,367.42,127.38,367.42Zm101.44-126.38a126.37,126.37,0,1,0,60.52,106.84V64.19H127.38v21.57A126.39,126.39,0,0,0,228.82,241.04Z" />
-                    </svg> Pedir no iFood
+                    <img 
+                      src="https://cdn-1.webcatalog.io/catalog/ifood/ifood-icon-filled-256.webp?v=1714774711502" 
+                      alt="iFood" 
+                      className="w-6 h-6 object-contain" 
+                    /> Pedir no iFood
                   </a>
                 )}
                 {business.website && (
@@ -721,9 +725,11 @@ export default function BusinessDetailScreen() {
                   rel="noopener noreferrer"
                   className="w-full bg-[#ea1d2c] text-white p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-lg shadow-[#ea1d2c]/20 hover:scale-[1.02] active:scale-95 transition-all"
                 >
-                  <svg viewBox="0 0 500 500" className="w-5 h-5 fill-white">
-                    <path d="M127.38,367.42c-34.9,0-63.19-28.29-63.19-63.19s28.29-63.19,63.19-63.19,63.19,28.29,63.19,63.19S162.28,367.42,127.38,367.42Zm101.44-126.38a126.37,126.37,0,1,0,60.52,106.84V64.19H127.38v21.57A126.39,126.39,0,0,0,228.82,241.04Z" />
-                  </svg> Pedir no iFood
+                  <img 
+                    src="https://cdn-1.webcatalog.io/catalog/ifood/ifood-icon-filled-256.webp?v=1714774711502" 
+                    alt="iFood" 
+                    className="w-7 h-7 object-contain" 
+                  /> Pedir no iFood
                 </a>
               )}
               {business.website && (
