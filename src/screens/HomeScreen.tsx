@@ -24,7 +24,8 @@ import {
   Home as HomeIcon,
   Heart,
   CupSoda,
-  IceCream
+  IceCream,
+  Dumbbell, Pill, Printer, ShoppingCart, Croissant, Book, PawPrint, Scissors, Stethoscope, Beef, Truck
 } from 'lucide-react';
 import { Business, BUSINESS_CATEGORIES } from '../types';
 import { isBoosted, calculateDistance, formatDistance, cn } from '../lib/utils';
@@ -33,18 +34,31 @@ import LocationPermissionModal from '../components/LocationPermissionModal';
 import { useAuth } from '../App';
 
 const CATEGORY_ICONS: Record<string, any> = {
-  "Restaurante": Utensils,
-  "Lanchonete": Pizza,
-  "Serviços": Wrench,
-  "Saúde": HeartPulse,
-  "Educação": GraduationCap,
-  "Moda": ShoppingBag,
-  "Beleza": Sparkles,
+  "Açougue": Beef,
+  "Academia": Dumbbell,
   "Automotivo": Car,
-  "Imobiliária": Building2,
   "Bebidas": CupSoda,
+  "Beleza": Sparkles,
+  "Educação": GraduationCap,
+  "Farmácia": Pill,
+  "Food Truck": Truck,
+  "Gráfica": Printer,
+  "Imobiliária": Building2,
+  "Lanchonete": Pizza,
+  "Mecânica": Wrench,
+  "Mercado": ShoppingCart,
+  "Moda": ShoppingBag,
+  "Outros": MapPin,
+  "Padaria": Croissant,
+  "Papelaria": Book,
+  "Pet": PawPrint,
+  "Pizzaria": Pizza,
+  "Restaurante": Utensils,
+  "Salão de Beleza": Scissors,
+  "Saúde": HeartPulse,
+  "Serviços": Wrench,
   "Sorveteria & Açaí": IceCream,
-  "Outros": MapPin
+  "Veterinária": Stethoscope
 };
 
 export default function HomeScreen() {

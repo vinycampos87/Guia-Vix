@@ -428,7 +428,7 @@ export default function AdminScreen() {
                       <img src={tempSettings.logoUrl} alt="Logo Preview" className="h-16 w-auto object-contain rounded-lg" referrerPolicy="no-referrer" />
                       <button 
                         onClick={() => setTempSettings(prev => ({...prev, logoUrl: ''}))}
-                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-1 rounded-full shadow-lg transition-opacity"
                       >
                         <X size={12} />
                       </button>
@@ -459,7 +459,7 @@ export default function AdminScreen() {
                       <img src={tempSettings.faviconUrl} alt="Favicon Preview" className="h-8 w-8 object-contain rounded-lg" referrerPolicy="no-referrer" />
                       <button 
                         onClick={() => setTempSettings(prev => ({...prev, faviconUrl: ''}))}
-                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-1 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-1 rounded-full shadow-lg transition-opacity"
                       >
                         <X size={12} />
                       </button>
@@ -561,7 +561,7 @@ export default function AdminScreen() {
                       <img src={tempSettings.ogImage} alt="OG Preview" className="w-full h-40 object-cover rounded-2xl" referrerPolicy="no-referrer" />
                       <button 
                         onClick={() => setTempSettings(prev => ({...prev, ogImage: ''}))}
-                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white p-2 rounded-full shadow-lg transition-opacity"
                       >
                         <X size={16} />
                       </button>
@@ -626,12 +626,12 @@ export default function AdminScreen() {
                         ...prev,
                         homeBanners: prev.homeBanners?.filter(b => b.id !== banner.id)
                       }))}
-                      className="absolute -top-3 -right-3 bg-rose-500 text-white p-1.5 rounded-full shadow-lg opacity-0 md:group-hover:opacity-100 transition-opacity z-10"
+                      className="absolute -top-3 -right-3 bg-rose-500 text-white p-1.5 rounded-full shadow-lg transition-all z-10 hover:bg-rose-600 hover:scale-110 active:scale-95"
                     >
                       <X size={14} />
                     </button>
                     
-                    <div className="flex gap-2 mb-2 absolute -top-3 right-8 z-10 opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-2 mb-2 absolute -top-3 right-8 z-10 transition-all">
                       <button
                         type="button"
                         onClick={() => {

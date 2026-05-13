@@ -43,6 +43,10 @@ export default function RegisterBusinessScreen() {
     mapsUrl: '',
     website: '',
     ifoodUrl: '',
+    instagram: '',
+    facebook: '',
+    linkedin: '',
+    tiktok: '',
     openingHours: '',
     bannerImage: '',
     images: [] as string[],
@@ -88,6 +92,10 @@ export default function RegisterBusinessScreen() {
               email: data.email || '',
               website: data.website || '',
               ifoodUrl: data.ifoodUrl || '',
+              instagram: data.instagram || '',
+              facebook: data.facebook || '',
+              linkedin: data.linkedin || '',
+              tiktok: data.tiktok || '',
               address: data.address,
               neighborhood: data.neighborhood || '',
               city: data.city || '',
@@ -598,15 +606,61 @@ export default function RegisterBusinessScreen() {
             </div>
 
             <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link iFood (Opcional)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Instagram (Opcional)</label>
               <input
                 type="url"
-                value={formData.ifoodUrl}
-                onChange={(e) => setFormData({ ...formData, ifoodUrl: e.target.value })}
+                value={formData.instagram}
+                onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
                 className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
-                placeholder="https://www.ifood.com.br/delivery/..."
+                placeholder="https://instagram.com/seu.perfil"
               />
             </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Facebook (Opcional)</label>
+              <input
+                type="url"
+                value={formData.facebook}
+                onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
+                placeholder="https://facebook.com/sua.pagina"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">LinkedIn (Opcional)</label>
+              <input
+                type="url"
+                value={formData.linkedin}
+                onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
+                placeholder="https://linkedin.com/company/sua.empresa"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">TikTok (Opcional)</label>
+              <input
+                type="url"
+                value={formData.tiktok}
+                onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+                className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
+                placeholder="https://tiktok.com/@seu.perfil"
+              />
+            </div>
+
+            {["Açougue", "Bebidas", "Food Truck", "Lanchonete", "Mercado", "Padaria", "Pizzaria", "Restaurante", "Sorveteria & Açaí"].includes(formData.category) && (
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link iFood (Opcional)</label>
+                <input
+                  type="url"
+                  value={formData.ifoodUrl}
+                  onChange={(e) => setFormData({ ...formData, ifoodUrl: e.target.value })}
+                  className="w-full mt-1 px-4 py-4 bg-slate-50 border-none rounded-2xl shadow-inner outline-none focus:bg-white focus:ring-2 focus:ring-primary font-bold text-slate-800 shadow-inner"
+                  placeholder="https://www.ifood.com.br/delivery/..."
+                />
+              </div>
+            )}
 
             <div className="space-y-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">

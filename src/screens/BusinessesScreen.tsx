@@ -27,18 +27,31 @@ import { cn, isBoosted, calculateDistance, formatDistance } from '../lib/utils';
 import { useFavorites } from '../hooks/useFavorites';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
-  "Restaurante": "🍽️",
-  "Lanchonete": "🍔",
-  "Serviços": "🛠️",
-  "Saúde": "🏥",
-  "Educação": "🎓",
-  "Moda": "🛍️",
-  "Beleza": "✨",
+  "Açougue": "🥩",
+  "Academia": "🏋️",
   "Automotivo": "🚗",
-  "Imobiliária": "🏢",
   "Bebidas": "🥤",
+  "Beleza": "✨",
+  "Educação": "🎓",
+  "Farmácia": "💊",
+  "Food Truck": "🚐",
+  "Gráfica": "🖨️",
+  "Imobiliária": "🏢",
+  "Lanchonete": "🍔",
+  "Mecânica": "🔧",
+  "Mercado": "🛒",
+  "Moda": "🛍️",
+  "Outros": "📍",
+  "Padaria": "🥖",
+  "Papelaria": "📚",
+  "Pet": "🐾",
+  "Pizzaria": "🍕",
+  "Restaurante": "🍽️",
+  "Salão de Beleza": "✂️",
+  "Saúde": "🏥",
+  "Serviços": "🛠️",
   "Sorveteria & Açaí": "🍧",
-  "Outros": "📍"
+  "Veterinária": "🩺"
 };
 
 export default function BusinessesScreen() {

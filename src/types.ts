@@ -57,6 +57,10 @@ export interface Business {
   longitude?: number;
   website?: string;
   ifoodUrl?: string;
+  instagram?: string;
+  facebook?: string;
+  linkedin?: string;
+  tiktok?: string;
 }
 
 export interface Review {
@@ -113,19 +117,32 @@ export interface Favorite {
 }
 
 export const BUSINESS_CATEGORIES = [
-  "Restaurante",
-  "Lanchonete",
-  "Serviços",
-  "Saúde",
-  "Educação",
-  "Moda",
-  "Beleza",
+  "Açougue",
+  "Academia",
   "Automotivo",
-  "Imobiliária",
   "Bebidas",
+  "Beleza",
+  "Educação",
+  "Farmácia",
+  "Food Truck",
+  "Gráfica",
+  "Imobiliária",
+  "Lanchonete",
+  "Mecânica",
+  "Mercado",
+  "Moda",
+  "Outros",
+  "Padaria",
+  "Papelaria",
+  "Pet",
+  "Pizzaria",
+  "Restaurante",
+  "Salão de Beleza",
+  "Saúde",
+  "Serviços",
   "Sorveteria & Açaí",
-  "Outros"
-];
+  "Veterinária"
+].sort();
 
 export const ES_CITIES = [
   "Vitória",
