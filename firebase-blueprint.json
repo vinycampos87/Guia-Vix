@@ -44,6 +44,8 @@
         "images": { "type": "array", "items": { "type": "string" } },
         "openingHours": { "type": "string" },
         "isFeatured": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["pending", "approved"] },
+        "slug": { "type": "string" },
         "boostExpiresAt": { "type": "string", "format": "date-time" },
         "neighborhood": { "type": "string" },
         "city": { "type": "string" },

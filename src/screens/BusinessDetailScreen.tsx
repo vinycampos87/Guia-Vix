@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db, handleFirestoreError, OperationType } from '../firebase';
-import { doc, getDoc, collection, setDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, setDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, where, getDocs, limit } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, Info, Send, User as UserIcon, Mail, X, Heart, Edit2, Trash2, Save, Landmark, Instagram, Facebook, Linkedin } from 'lucide-react';
+import { ChevronLeft, MapPin, Phone, MessageCircle, Share2, Star, Globe, Clock, Info, Send, User as UserIcon, Mail, X, Heart, Edit2, Trash2, Save, Landmark, Instagram, Facebook, Linkedin, Shield } from 'lucide-react';
 import { Business, Review } from '../types';
 import { useAuth } from '../App';
 import { cn } from '../lib/utils';
@@ -23,7 +23,7 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function BusinessDetailScreen() {
-  const { id } = useParams();
+  const { id, slug } = useParams();
   const navigate = useNavigate();
   const { user, profile, isAdmin } = useAuth();
   const { favorites, toggleFavorite } = useFavorites();
@@ -48,13 +48,35 @@ export default function BusinessDetailScreen() {
   }, [personalReview, editingPersonalReview]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id && !slug) return;
+
+    let unsubscribe: () => void;
 
     const fetchBusiness = async () => {
+      setLoading(true);
       try {
-        const docSnap = await getDoc(doc(db, 'businesses', id));
-        if (docSnap.exists()) {
-          setBusiness({ id: docSnap.id, ...docSnap.data() } as Business);
+        let docSnap;
+        let finalId = id;
+
+        if (id) {
+          docSnap = await getDoc(doc(db, 'businesses', id));
+        } else if (slug) {
+          const qSlug = query(collection(db, 'businesses'), where('slug', '==', slug), limit(1));
+          const querySnap = await getDocs(qSlug);
+          if (!querySnap.empty) {
+            docSnap = querySnap.docs[0];
+            finalId = docSnap.id;
+          }
+        }
+
+        if (docSnap && docSnap.exists() && finalId) {
+          setBusiness({ id: finalId, ...docSnap.data() } as Business);
+
+          // Setup reviews listener
+          const qReviews = query(collection(db, 'businesses', finalId, 'reviews'), orderBy('createdAt', 'desc'));
+          unsubscribe = onSnapshot(qReviews, (snap) => {
+            setReviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review)));
+          });
         }
       } catch (e) {
         console.error("Error fetching business:", e);
@@ -62,14 +84,12 @@ export default function BusinessDetailScreen() {
       setLoading(false);
     };
 
-    const q = query(collection(db, 'businesses', id, 'reviews'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setReviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review)));
-    });
-
     fetchBusiness();
-    return () => unsubscribe();
-  }, [id]);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [id, slug]);
 
   const avgRating = useMemo(() => {
     if (reviews.length === 0) return 0;
@@ -237,6 +257,32 @@ export default function BusinessDetailScreen() {
       alert(errorMessage);
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+  const isOwner = useMemo(() => {
+    return user && business && business.ownerId === user.uid;
+  }, [user, business]);
+
+  const handleClaim = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    if (!id) return;
+    if (!confirm("Deseja reivindicar esta empresa como proprietário? Isso permitirá que você edite as informações.")) return;
+
+    try {
+      await updateDoc(doc(db, 'businesses', id), {
+        ownerId: user.uid,
+        updatedAt: serverTimestamp()
+      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
+
+      setBusiness(prev => prev ? { ...prev, ownerId: user.uid } : null);
+      alert("Empresa reivindicada com sucesso! Agora você pode editá-la.");
+    } catch (error) {
+      console.error("Error claiming business:", error);
+      alert("Erro ao reivindicar empresa.");
     }
   };
 
@@ -748,12 +794,25 @@ export default function BusinessDetailScreen() {
           {/* Desktop Contact Card */}
           <div className="hidden md:flex flex-col gap-6 bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-2 h-full bg-primary" />
-            <div>
-              <h2 className="text-xl font-black text-slate-800 tracking-tight">Contato e Reservas</h2>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Fale agora mesmo</p>
-            </div>
-
             <div className="space-y-3">
+              {(isOwner || isAdmin) && (
+                <button 
+                  onClick={() => navigate(`/edit-business/${id}`)}
+                  className="w-full bg-slate-100 text-slate-800 p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 border border-slate-200 hover:bg-slate-200 active:scale-95 transition-all"
+                >
+                  <Edit2 size={20} /> Editar Minha Empresa
+                </button>
+              )}
+
+              {(!business.ownerId && !isAdmin) && (
+                <button 
+                  onClick={handleClaim}
+                  className="w-full bg-amber-50 text-amber-600 p-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 border border-amber-200 hover:bg-amber-100 active:scale-95 transition-all"
+                >
+                  <Shield size={20} /> Reivindicar Empresa
+                </button>
+              )}
+
               {business.whatsapp && (
                 <a 
                   href={`https://wa.me/55${business.whatsapp.replace(/\D/g, '')}`}

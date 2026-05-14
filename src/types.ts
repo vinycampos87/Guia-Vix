@@ -51,6 +51,8 @@ export interface Business {
   reviewCount?: number;
   isFeatured?: boolean;
   boostExpiresAt?: any;
+  status: 'pending' | 'approved';
+  slug: string;
   neighborhood?: string;
   city?: string;
   latitude?: number;

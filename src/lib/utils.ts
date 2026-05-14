@@ -5,6 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .normalize('NFD') // separate diacritics
+    .replace(/[\u0300-\u036f]/g, '') // remove diacritics
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+};
+
 export const isBoosted = (item: any) => {
   if (!item.boostExpiresAt) return false;
   const expiry = item.boostExpiresAt.seconds 

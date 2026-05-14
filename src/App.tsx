@@ -331,6 +331,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<HomeScreen />} />
               <Route path="/business/:id" element={<BusinessDetailScreen />} />
+              <Route path="/empresa/:slug" element={<BusinessDetailScreen />} />
               <Route path="/classified/:id" element={<ClassifiedDetailScreen />} />
               <Route path="/job/:id" element={<JobDetailScreen />} />
               <Route path="/privacidade" element={<PrivacyPolicyScreen />} />

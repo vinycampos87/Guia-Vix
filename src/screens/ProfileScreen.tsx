@@ -340,7 +340,15 @@ export default function ProfileScreen() {
                     <h4 className="font-bold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">{b.name}</h4>
                     {b.isFeatured && <Star size={12} className="text-amber-400 fill-amber-400" />}
                   </div>
-                  <p className="text-gray-500 text-xs">{b.category}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-gray-500 text-xs">{b.category}</p>
+                    <span className={cn(
+                      "text-[8px] font-black uppercase px-2 py-0.5 rounded-full",
+                      b.status === 'approved' ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                    )}>
+                      {b.status === 'approved' ? 'Aprovado' : 'Pendente'}
+                    </span>
+                  </div>
                 </div>
               </Link>
               <div className="flex gap-1 items-center shrink-0">

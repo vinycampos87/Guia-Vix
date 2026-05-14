@@ -71,7 +71,11 @@ export default function BusinessesScreen() {
   useEffect(() => {
     const fetchBusinesses = async () => {
       try {
-        const q = query(collection(db, 'businesses'), orderBy('createdAt', 'desc'));
+        const q = query(
+          collection(db, 'businesses'), 
+          where('status', '==', 'approved'),
+          orderBy('createdAt', 'desc')
+        );
         const querySnapshot = await getDocs(q).catch(e => { throw handleFirestoreError(e, OperationType.LIST, 'businesses'); });
         setBusinesses(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business)));
       } catch (error) {
@@ -215,7 +219,7 @@ export default function BusinessesScreen() {
               key={b.id}
               className="h-full"
             >
-              <Link to={`/business/${b.id}`} className="block h-full">
+              <Link to={b.slug ? `/empresa/${b.slug}` : `/business/${b.id}`} className="block h-full">
                 <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group active:scale-[0.98] h-full flex flex-col">
                   <div className="flex p-3 gap-4 flex-1">
                     <div className="relative shrink-0">

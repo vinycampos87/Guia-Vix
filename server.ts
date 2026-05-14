@@ -1,8 +1,9 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 async function startServer() {
   const app = express();

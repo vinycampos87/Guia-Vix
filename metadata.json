@@ -2,5 +2,5 @@
   "name": "Guia Vitória ES",
   "description": "Guia local de negócios, classificados, vagas de emprego e horários de ônibus para Vitória, Espírito Santo.",
   "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

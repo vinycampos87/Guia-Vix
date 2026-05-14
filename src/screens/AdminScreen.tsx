@@ -8,11 +8,13 @@ import {
   Shield, Store, Star, ChevronLeft, Search, CheckCircle2, XCircle, 
   Briefcase, ShoppingBag, Trash2, Users, Settings, UserMinus, 
   UserCheck, ShieldCheck, Mail, Phone, ExternalLink, Image as ImageIcon, Save,
-  Edit2, Upload, X, MessageSquare, Database, RefreshCcw, AlertTriangle, Plus, ArrowUp, ArrowDown, Layout
+  Edit2, Upload, X, MessageSquare, Database, RefreshCcw, AlertTriangle, Plus, ArrowUp, ArrowDown, Layout, FileText, Check, AlertCircle, Loader2
 } from 'lucide-react';
-import { Business, Classified, Job, UserProfile, AppSettings, Review } from '../types';
+import Papa from 'papaparse';
+import { Business, Classified, Job, UserProfile, AppSettings, Review, BUSINESS_CATEGORIES, ES_CITIES } from '../types';
 import { seedBusinesses } from '../scripts/seedData';
 import { compressImage } from '../lib/imageUtils';
+import { slugify, cn } from '../lib/utils';
 
 type AdminTab = 'businesses' | 'jobs' | 'classifieds' | 'users' | 'settings' | 'reviews';
 
@@ -35,6 +37,166 @@ export default function AdminScreen() {
   const [seeding, setSeeding] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
+
+  // CSV Import State
+  const [showCsvModal, setShowCsvModal] = useState(false);
+  const [csvData, setCsvData] = useState<any[]>([]);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
+  const [importProgress, setImportProgress] = useState(0);
+  const [importStatus, setImportStatus] = useState<'idle' | 'parsing' | 'mapping' | 'preview' | 'importing' | 'completed' | 'error'>('idle');
+  const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [duplicateCount, setDuplicateCount] = useState(0);
+  const [existingBusinesses, setExistingBusinesses] = useState<Record<string, boolean>>({});
+
+  const REQUIRED_FIELDS = [
+    { key: 'name', label: 'Nome' },
+    { key: 'category', label: 'Categoria' },
+    { key: 'address', label: 'Endereço' },
+  ];
+
+  const OPTIONAL_FIELDS = [
+    { key: 'description', label: 'Descrição' },
+    { key: 'phone', label: 'Telefone' },
+    { key: 'whatsapp', label: 'WhatsApp' },
+    { key: 'city', label: 'Cidade' },
+    { key: 'neighborhood', label: 'Bairro' },
+    { key: 'website', label: 'Website' },
+    { key: 'instagram', label: 'Instagram' },
+    { key: 'openingHours', label: 'Horário' },
+    { key: 'bannerImage', label: 'Imagem de Capa (URL)' },
+    { key: 'latitude', label: 'Latitude' },
+    { key: 'longitude', label: 'Longitude' },
+  ];
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportStatus('parsing');
+    setImportErrors([]);
+    
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        if (results.data && results.data.length > 0) {
+          setCsvData(results.data);
+          const headers = Object.keys(results.data[0]);
+          setCsvHeaders(headers);
+          
+          // Try to auto-map
+          const initialMapping: Record<string, string> = {};
+          const allFields = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
+          
+          allFields.forEach(field => {
+            const match = headers.find(h => 
+              h.toLowerCase() === field.key.toLowerCase() || 
+              h.toLowerCase() === field.label.toLowerCase()
+            );
+            if (match) initialMapping[field.key] = match;
+          });
+          
+          setColumnMapping(initialMapping);
+          setImportStatus('mapping');
+        } else {
+          setImportErrors(['O arquivo está vazio ou formatado incorretamente.']);
+          setImportStatus('error');
+        }
+      },
+      error: (error) => {
+        setImportErrors([`Erro ao ler CSV: ${error.message}`]);
+        setImportStatus('error');
+      }
+    });
+  };
+
+  const checkDuplicates = () => {
+    const dupes = csvData.filter(row => {
+      const name = row[columnMapping['name']]?.toString().toLowerCase().trim();
+      const phone = row[columnMapping['phone']]?.toString().replace(/\D/g, '');
+      
+      // Check against local businesses
+      return businesses.some(b => 
+        (name && b.name.toLowerCase().trim() === name) || 
+        (phone && b.phone.replace(/\D/g, '') === phone)
+      );
+    });
+    setDuplicateCount(dupes.length);
+  };
+
+  const startImport = async () => {
+    if (!user) return;
+    setImportStatus('importing');
+    setImportProgress(0);
+    setImportErrors([]);
+    
+    const batchSize = 50;
+    const total = csvData.length;
+    let completed = 0;
+    const errors: string[] = [];
+
+    // Pre-match categories to be safer
+    const matchCategory = (cat: string) => {
+      const normalized = cat?.toString().trim();
+      const match = BUSINESS_CATEGORIES.find(bc => bc.toLowerCase() === normalized.toLowerCase());
+      return match || 'Outros';
+    };
+
+    for (let i = 0; i < total; i += batchSize) {
+      const batch = writeBatch(db);
+      const currentBatch = csvData.slice(i, i + batchSize);
+      
+      for (const row of currentBatch) {
+        try {
+          const name = row[columnMapping['name']];
+          if (!name) continue;
+
+          const businessData: any = {
+            name: name,
+            category: matchCategory(row[columnMapping['category']]),
+            description: row[columnMapping['description']] || '',
+            phone: row[columnMapping['phone']] || '',
+            whatsapp: row[columnMapping['whatsapp']] || row[columnMapping['phone']] || '',
+            address: row[columnMapping['address']] || '',
+            city: row[columnMapping['city']] || 'Vitória',
+            neighborhood: row[columnMapping['neighborhood']] || '',
+            website: row[columnMapping['website']] || '',
+            instagram: row[columnMapping['instagram']] || '',
+            openingHours: row[columnMapping['openingHours']] || '',
+            bannerImage: row[columnMapping['bannerImage']] || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200',
+            images: [],
+            latitude: row[columnMapping['latitude']] ? parseFloat(row[columnMapping['latitude']]) : null,
+            longitude: row[columnMapping['longitude']] ? parseFloat(row[columnMapping['longitude']]) : null,
+            ownerId: '', // Unclaimed by default
+            createdAt: serverTimestamp(),
+            status: 'approved', // CSV imports are usually admin actions
+            slug: slugify(name),
+            isFeatured: false,
+            rating: 0,
+            reviewCount: 0
+          };
+
+          const newDocRef = doc(collection(db, 'businesses'));
+          batch.set(newDocRef, businessData);
+        } catch (err) {
+          errors.push(`Erro na linha ${i + currentBatch.indexOf(row) + 1}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+
+      try {
+        await batch.commit();
+        completed += currentBatch.length;
+        setImportProgress(Math.round((completed / total) * 100));
+      } catch (err) {
+        errors.push(`Erro ao salvar lote: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    setImportErrors(errors);
+    setImportStatus('completed');
+    fetchData();
+  };
 
   // Settings state
   const [tempSettings, setTempSettings] = useState<AppSettings>({
@@ -170,6 +332,24 @@ export default function AdminScreen() {
     } catch (e) {
       console.error("Error updating user status:", e instanceof Error ? e.message : String(e));
       alert("Erro ao atualizar status do usuário.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const approveBusiness = async (id: string) => {
+    setUpdatingId(id);
+    try {
+      await updateDoc(doc(db, 'businesses', id), {
+        status: 'approved',
+        updatedAt: serverTimestamp()
+      }).catch(e => { throw handleFirestoreError(e, OperationType.UPDATE, `businesses/${id}`); });
+
+      setBusinesses(prev => prev.map(b => b.id === id ? { ...b, status: 'approved' } : b));
+      alert("Empresa aprovada com sucesso!");
+    } catch (error) {
+      console.error("Error approving business:", error);
+      alert("Erro ao aprovar empresa.");
     } finally {
       setUpdatingId(null);
     }
@@ -400,15 +580,27 @@ export default function AdminScreen() {
       </div>
 
       {activeTab !== 'settings' && (
-        <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder={`Buscar por nome, email ou telefone...`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-4 bg-white border border-slate-100 rounded-3xl shadow-sm focus:ring-2 focus:ring-primary outline-none transition-all text-sm font-medium"
-          />
+        <div className="flex gap-2 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder={`Buscar por nome, email ou telefone...`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-4 bg-white border border-slate-100 rounded-3xl shadow-sm focus:ring-2 focus:ring-primary outline-none transition-all text-sm font-medium"
+            />
+          </div>
+          {activeTab === 'businesses' && (
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={() => setShowCsvModal(true)}
+                className="px-6 bg-emerald-500 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all"
+              >
+                <FileText size={16} /> Importar CSV
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -939,7 +1131,17 @@ export default function AdminScreen() {
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-slate-800 truncate text-sm">{item.name || item.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-slate-800 truncate text-sm">{item.name || item.title}</h3>
+                      {activeTab === 'businesses' && (
+                        <span className={cn(
+                          "text-[8px] font-black uppercase px-2 py-0.5 rounded-full shrink-0",
+                          item.status === 'approved' ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                        )}>
+                          {item.status === 'approved' ? 'Aprovado' : 'Pendente'}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate mt-0.5">
                       {activeTab === 'businesses' ? item.category : activeTab === 'jobs' ? item.companyName : (item.price || 'A combinar')}
                     </p>
@@ -947,6 +1149,15 @@ export default function AdminScreen() {
                       <Link to={`/${activeTab === 'businesses' ? 'business' : activeTab === 'jobs' ? 'job' : 'classified'}/${item.id}`} className="text-primary text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
                         Ver <ExternalLink size={10} />
                       </Link>
+                      {activeTab === 'businesses' && item.status !== 'approved' && (
+                        <button 
+                          onClick={() => approveBusiness(item.id)}
+                          disabled={updatingId === item.id}
+                          className="text-emerald-600 text-[9px] font-black uppercase tracking-widest flex items-center gap-1 ml-2"
+                        >
+                          <CheckCircle2 size={10} /> Aprovar Agora
+                        </button>
+                      )}
                       {isBoosted(item) && (
                         <span className="text-emerald-500 text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
                           <Star size={8} fill="currentColor" /> Ativo até {
@@ -1090,6 +1301,283 @@ export default function AdminScreen() {
                 >
                   {updatingId === itemToDelete.id ? 'Excluindo...' : 'Excluir'}
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* CSV Import Modal */}
+      <AnimatePresence>
+        {showCsvModal && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => importStatus !== 'importing' && setShowCsvModal(false)}
+              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
+                    <FileText size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-800">Importador de Empresas</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Suporta milhares de registros via CSV</p>
+                  </div>
+                </div>
+                {importStatus !== 'importing' && (
+                  <button 
+                    onClick={() => setShowCsvModal(false)}
+                    className="p-3 hover:bg-slate-200 rounded-full transition-colors text-slate-400"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8">
+                {importStatus === 'idle' && (
+                  <div className="space-y-6 text-center">
+                    <div className="py-12 border-2 border-dashed border-slate-200 rounded-[32px] bg-slate-50 hover:bg-slate-100 transition-all">
+                      <input 
+                        type="file" 
+                        accept=".csv" 
+                        id="csv-upload" 
+                        className="hidden" 
+                        onChange={handleFileUpload}
+                      />
+                      <label htmlFor="csv-upload" className="cursor-pointer flex flex-col items-center">
+                        <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center text-emerald-500 mb-4">
+                          <Upload size={28} />
+                        </div>
+                        <span className="text-sm font-black text-slate-800 uppercase tracking-widest">Clique para selecionar seu CSV</span>
+                        <span className="text-[10px] text-slate-400 mt-2 font-medium">Recomendado: Máximo 5000 linhas por vez</span>
+                      </label>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-left">
+                      <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                        <CheckCircle2 size={16} className="text-emerald-500 mb-2" />
+                        <h4 className="text-[10px] font-black text-emerald-700 uppercase mb-1">Passo 1</h4>
+                        <p className="text-[9px] text-emerald-600 font-medium">Suba o arquivo .csv com os dados das empresas.</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <Layout size={16} className="text-slate-400 mb-2" />
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase mb-1">Passo 2</h4>
+                        <p className="text-[9px] text-slate-400 font-medium">Mapeie as colunas do CSV para os campos do sistema.</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <Database size={16} className="text-slate-400 mb-2" />
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase mb-1">Passo 3</h4>
+                        <p className="text-[9px] text-slate-400 font-medium">Revise e inicie a importação em lote.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {importStatus === 'mapping' && (
+                  <div className="space-y-6">
+                    <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex gap-3">
+                      <AlertCircle className="text-amber-500 shrink-0" size={18} />
+                      <p className="text-[10px] text-amber-700 font-medium leading-relaxed uppercase tracking-wide">
+                        Vincule as colunas do seu arquivo aos campos abaixo. Campos com * são obrigatórios.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Campos Obrigatórios</h4>
+                        {REQUIRED_FIELDS.map(field => (
+                          <div key={field.key} className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center justify-between">
+                              {field.label}*
+                              {!columnMapping[field.key] && <span className="text-rose-500 text-[8px] font-bold">REQUERIDO</span>}
+                            </label>
+                            <select 
+                              value={columnMapping[field.key] || ''}
+                              onChange={e => setColumnMapping(prev => ({ ...prev, [field.key]: e.target.value }))}
+                              className={`w-full px-4 py-3 rounded-xl border text-sm appearance-none outline-none focus:ring-2 focus:ring-emerald-500 ${columnMapping[field.key] ? 'bg-emerald-50/30 border-emerald-100' : 'bg-slate-50 border-slate-200'}`}
+                            >
+                              <option value="">Não mapear</option>
+                              {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                            </select>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="space-y-4">
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Campos Opcionais</h4>
+                        <div className="space-y-3 h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                          {OPTIONAL_FIELDS.map(field => (
+                            <div key={field.key} className="space-y-1.5">
+                              <label className="text-[10px] font-black text-slate-700 uppercase tracking-widest">{field.label}</label>
+                              <select 
+                                value={columnMapping[field.key] || ''}
+                                onChange={e => setColumnMapping(prev => ({ ...prev, [field.key]: e.target.value }))}
+                                className={`w-full px-4 py-3 rounded-xl border text-sm appearance-none outline-none focus:ring-2 focus:ring-emerald-500 ${columnMapping[field.key] ? 'bg-emerald-50/10 border-emerald-100' : 'bg-slate-50 border-slate-100'}`}
+                              >
+                                <option value="">Não mapear</option>
+                                {csvHeaders.map(h => <option key={h} value={h}>{h}</option>)}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex gap-4">
+                      <button 
+                        onClick={() => setImportStatus('idle')}
+                        className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+                      >
+                        Trocar Arquivo
+                      </button>
+                      <button 
+                        disabled={!REQUIRED_FIELDS.every(f => !!columnMapping[f.key])}
+                        onClick={() => {
+                          checkDuplicates();
+                          setImportStatus('preview');
+                        }}
+                        className="flex-[2] py-4 bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-100 disabled:opacity-50"
+                      >
+                        Continuar para Preview
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {importStatus === 'preview' && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 text-center">
+                        <FileText size={24} className="text-slate-400 mx-auto mb-2" />
+                        <h4 className="text-2xl font-black text-slate-800">{csvData.length}</h4>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total de Linhas</p>
+                      </div>
+                      <div className="p-6 bg-amber-50 rounded-3xl border border-amber-100 text-center">
+                        <AlertTriangle size={24} className={duplicateCount > 0 ? "text-amber-500 mx-auto mb-2" : "text-slate-300 mx-auto mb-2"} />
+                        <h4 className="text-2xl font-black text-amber-600">{duplicateCount}</h4>
+                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Possíveis Duplicados</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Amostra dos Dados (Primeiras 3 Linhas)</h4>
+                      <div className="space-y-2">
+                        {csvData.slice(0, 3).map((row, i) => (
+                          <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 font-mono text-[10px] overflow-hidden truncate">
+                            {JSON.stringify(row)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 space-y-4">
+                      <div className="flex items-center gap-3 text-emerald-700">
+                        <Check size={20} />
+                        <h4 className="text-sm font-black uppercase tracking-widest">Revisão Final</h4>
+                      </div>
+                      <ul className="space-y-2">
+                        <li className="text-[10px] text-emerald-600 font-medium flex items-center gap-2">• Slugs serão gerados automaticamente.</li>
+                        <li className="text-[10px] text-emerald-600 font-medium flex items-center gap-2">• Status será definido como "Aprovado".</li>
+                        <li className="text-[10px] text-emerald-600 font-medium flex items-center gap-2">• Empresas sem dono definido ficarão como "Reivindicáveis".</li>
+                      </ul>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <button 
+                        onClick={() => setImportStatus('mapping')}
+                        className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-[10px]"
+                      >
+                        Voltar
+                      </button>
+                      <button 
+                        onClick={startImport}
+                        className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-100"
+                      >
+                        Confirmar e Iniciar Importação
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {importStatus === 'importing' && (
+                  <div className="py-12 space-y-8 text-center px-12">
+                    <div className="relative w-32 h-32 mx-auto">
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle
+                          cx="64" cy="64" r="60"
+                          className="stroke-slate-100 fill-none"
+                          strokeWidth="8"
+                        />
+                        <circle
+                          cx="64" cy="64" r="60"
+                          className="stroke-emerald-500 fill-none transition-all duration-300"
+                          strokeWidth="8"
+                          strokeDasharray={377}
+                          strokeDashoffset={377 - (377 * importProgress) / 100}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center flex-col">
+                        <span className="text-3xl font-black text-slate-800">{importProgress}%</span>
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Processando</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-3 text-emerald-500">
+                        <Loader2 className="animate-spin" size={20} />
+                        <span className="text-sm font-black uppercase tracking-widest">Salvando no Banco de Dados</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-medium px-4">
+                        Estamos processando em lotes de 50 para garantir estabilidade. Não feche esta janela.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {importStatus === 'completed' && (
+                  <div className="py-8 space-y-8 text-center">
+                    <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto scale-110">
+                      <CheckCircle2 size={48} />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-2xl font-black text-slate-800">Sucesso!</h3>
+                      <p className="text-sm text-slate-500 font-medium">A importação foi concluída com êxito.</p>
+                    </div>
+
+                    {importErrors.length > 0 && (
+                      <div className="bg-rose-50 text-rose-500 p-6 rounded-3xl text-left border border-rose-100">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <AlertCircle size={14} /> {importErrors.length} Erros Encontrados
+                        </h4>
+                        <div className="max-h-32 overflow-y-auto text-[10px] font-mono space-y-1 custom-scrollbar">
+                          {importErrors.slice(0, 50).map((err, i) => <div key={i}>{err}</div>)}
+                          {importErrors.length > 50 && <div>E mais {importErrors.length - 50} erros...</div>}
+                        </div>
+                      </div>
+                    )}
+
+                    <button 
+                      onClick={() => {
+                        setShowCsvModal(false);
+                        setImportStatus('idle');
+                      }}
+                      className="w-full py-4 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200"
+                    >
+                      Voltar ao Painel
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

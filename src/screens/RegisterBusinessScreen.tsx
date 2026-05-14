@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Store, MapPin, Phone, MessageCircle, Image as ImageIcon, ChevronLeft, Save, Plus, X, Camera, Landmark, Clock, Check } from 'lucide-react';
 import { BUSINESS_CATEGORIES, ES_CITIES } from '../types';
 import ImageCropper from '../components/ImageCropper';
-import { cn, safeStringify } from '../lib/utils';
+import { cn, safeStringify, slugify } from '../lib/utils';
 
 const DAYS_OF_WEEK = [
   { key: 'seg', label: 'Segunda-feira' },
@@ -287,6 +287,8 @@ export default function RegisterBusinessScreen() {
 
       const dataToSave = {
         ...formData,
+        slug: slugify(formData.name),
+        status: isAdmin ? 'approved' : (isEdit ? 'approved' : 'pending'), // Keep approved if editing, new ones are pending unless admin
         latitude: formData.latitude ?? null,
         longitude: formData.longitude ?? null,
         openingHours: openingHoursJson,

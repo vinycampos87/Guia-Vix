@@ -115,8 +115,16 @@ export default function HomeScreen() {
     const fetchData = async () => {
       try {
         // Fetch more to ensure we have enough featured and regular
-        const q = query(collection(db, 'businesses'), limit(40));
-        const querySnapshot = await getDocs(q).catch(e => { throw handleFirestoreError(e, OperationType.LIST, 'businesses'); });
+        const q = query(
+          collection(db, 'businesses'), 
+          where('status', '==', 'approved'),
+          limit(40)
+        );
+        const querySnapshot = await getDocs(q).catch(e => { 
+          // If the status field doesn't exist on all docs yet, this might fail or return nothing if it's a new field
+          // We can fallback to a query without status if it fails, or just trust our migration
+          throw handleFirestoreError(e, OperationType.LIST, 'businesses'); 
+        });
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Business));
         setBusinesses(data);
         
@@ -207,7 +215,7 @@ export default function HomeScreen() {
       return {
         id: bus.id,
         image: bus.bannerImage,
-        link: `/business/${bus.id}`,
+        link: bus.slug ? `/empresa/${bus.slug}` : `/business/${bus.id}`,
         title: bus.name,
         subtitle: isBoosted(bus) 
           ? { text: 'Anunciante Premium', isFeatured: true } 
@@ -397,7 +405,7 @@ export default function HomeScreen() {
                 className="w-full"
               >
                 <Link
-                  to={`/business/${b.id}`}
+                  to={b.slug ? `/empresa/${b.slug}` : `/business/${b.id}`}
                   className="block group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 h-full"
                 >
                   <div className="relative h-40">
